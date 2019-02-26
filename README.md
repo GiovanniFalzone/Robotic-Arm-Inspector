@@ -1,6 +1,7 @@
 # Robotic-Arm-Inspector
+# Description
 ROS robotic arm to inspect vehicles mechanical components
 
-# Authors
+## Authors
 Roberto Ciardi - www.github.com/robertociardi - robertociardi.github.io 
 Giovanni Falzone - www.github.com/GiovanniFalzone - giovannifalzone.github.io 
