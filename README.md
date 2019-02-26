@@ -1,5 +1,5 @@
 # Robotic-Arm-Inspector
-# Description
+## Description
 ROS robotic arm to inspect vehicles mechanical components
 
 ## Authors
