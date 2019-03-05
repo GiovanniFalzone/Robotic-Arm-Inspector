@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="limited" default="true"/>
+  <arg name="debug" default="false" />
+  <arg name="sim" default="true" />
+
   <!-- startup simulated world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <!-- <arg name="world_name" default="worlds/empty.world"/> -->
@@ -16,8 +20,15 @@
 
   <rosparam file="$(find ur_gazebo)/controller/arm_controller_ur5.yaml" command="load"/>
   <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
+
+  <!-- Remap follow_joint_trajectory -->
+  <remap if="$(arg sim)" from="/follow_joint_trajectory" to="/arm_controller/follow_joint_trajectory"/>
+
   <!-- Launch moveit -->
-  <include file="$(find ur5_moveit_config)/launch/move_group.launch"/>
+  <include file="$(find ur5_moveit_config)/launch/move_group.launch">
+    <arg name="limited" default="$(arg limited)"/>
+    <arg name="debug" default="$(arg debug)" />
+  </include>
 
 </launch>
 
