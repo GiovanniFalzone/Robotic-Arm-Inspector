@@ -8,7 +8,7 @@ Giovanni Falzone - www.github.com/GiovanniFalzone - giovannifalzone.github.io \
 Roberto Ciardi - www.github.com/robertociardi - robertociardi.github.io
 
 ## Dependencies
-Universal Robot - https://github.com/ros-industrial/universal_robot
+Universal Robot - https://github.com/ros-industrial/universal_robot \
 Common Sensors - https://github.com/JenniferBuehler/common-sensors
 
 ## Howto
