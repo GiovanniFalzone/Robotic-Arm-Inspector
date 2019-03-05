@@ -3,11 +3,11 @@
   <!-- startup simulated world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <!-- <arg name="world_name" default="worlds/empty.world"/> -->
-    <arg name="world_name" value="$(find robot_inspector)/worlds/railway.world"/>
+    <arg name="world_name" value="$(find robotic_arm_inspector)/worlds/railway.world"/>
   </include>
 
 <!-- create the final urdf of the robot starting from xacro, then include in param -->
-  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find robot_inspector)/urdf/robot_inspector.urdf.xacro'" />
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find robotic_arm_inspector)/urdf/robotic_arm_inspector.urdf.xacro'" />
 
 <!-- start ur ur5 control -->
   <!-- push robot_description to factory and spawn robot in gazebo -->

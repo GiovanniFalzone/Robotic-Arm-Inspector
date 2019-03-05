@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="robot_inspector" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="robotic_arm_inspector" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- ur5 from universal robots package-->
   <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro" />
   <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
