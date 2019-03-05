@@ -1,0 +1,213 @@
+<?xml version="1.0" ?>
+<%
+    wheel_radius = 1.0
+    wheel_length = 0.4
+    axis_radius = 0.2
+    axis_length = 4.0
+    disk_length = wheel_length/2
+    disk_radius = wheel_radius/2
+    bin_height = 1.0
+    bin_width = wheel_length
+    bin_length = 2*wheel_radius
+
+    no_rotation = [0, 0, 0]
+
+    #global variables for positions and rotations
+    x0 = 0.0
+    z0 = wheel_radius+bin_height/2 #wheel should touch binary
+    y0 = 0.0
+    roll = 0.0
+    pitch = Math::PI/2
+    yaw = Math::PI/2
+
+    initial_pos = [x0, y0, 0.0]
+
+    #wheel variables
+    lw_x0 = rw_x0 = x0
+    lw_y0 = 0.0
+    lw_z0 = rw_z0 = z0
+    lw_r = rw_r = roll
+    lw_p = rw_p = pitch
+    lw_y = rw_y = yaw
+    
+    left_wheel_arr = [lw_x0, lw_y0, lw_z0, lw_r, lw_p, lw_y] 
+
+    rw_y0 = axis_length    
+    right_wheel_arr = [rw_x0, rw_y0, rw_z0, rw_r, rw_p, rw_y] 
+
+    #disk variables
+    ld_x0 = rd_x0 = x0
+    ld_y0 = axis_length/3
+    ld_z0 = rd_z0 = z0
+    ld_r = rd_r = roll
+    ld_p = rd_p = pitch
+    ld_y = rd_y = yaw
+
+    left_disk_arr = [ld_x0, ld_y0, ld_z0, ld_r, ld_p, ld_y]
+
+    rd_y0 = axis_length*2/3
+    right_disk_arr = [rd_x0, rd_y0, rd_z0, rd_r, rd_p, rd_y]
+
+    #axis variables
+    ax_x0 = x0
+    ax_y0 = (rw_y0 - lw_y0)/2
+    ax_z0 = z0
+    ax_r = roll
+    ax_p = pitch
+    ax_y = yaw 
+
+    axis_arr = [ax_x0, ax_y0, ax_z0, ax_r, ax_p, ax_y] 
+
+%>
+<sdf version="1.5">
+  <model name="train_model">
+    <static>true</static> 
+    <link name="axis">
+        <pose><%= axis_arr.join(" ") %></pose>
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius><%= axis_radius %></radius>
+                    <length><%= axis_length %></length>
+                </cylinder>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius><%= axis_radius %></radius>
+                    <length><%= axis_length %></length>
+                </cylinder>
+            </geometry>
+        </visual>
+    </link>
+    <link name='left_binary'>
+        <pose><%= initial_pos.join(" ")%> <%= no_rotation.join(" ")%></pose>
+        <collision name='collision'>
+            <geometry>
+                <box>
+                    <size><%= bin_length %> <%= bin_width %> <%= bin_height %></size>
+                </box>
+            </geometry>
+        </collision>
+        <visual name='visual'>
+            <geometry>
+                <box>
+                    <size><%= bin_length %> <%= bin_width %> <%= bin_height %></size>
+                </box>
+            </geometry>
+        </visual>
+    </link>  
+    <link name='right_binary'>
+        <pose>0.0 <%= rw_y0 %> 0.0 <%= no_rotation.join(" ")%></pose>
+        <collision name='collision'>
+            <geometry>
+                <box>
+                    <size><%= bin_length %> <%= bin_width %> <%= bin_height %></size>
+                </box>
+            </geometry>
+        </collision>
+        <visual name='visual'>
+            <geometry>
+                <box>
+                    <size><%= bin_length %> <%= bin_width %> <%= bin_height %></size>
+                </box>
+            </geometry>
+        </visual>
+    </link>  
+    <!--link name='chassis'>   
+        <pose>0 0 2.0 0 0 0</pose>
+        <collision name='collision'>   
+            <geometry>
+                <box>
+                    <size>5.0 2.0 2.0</size>
+                </box>
+            </geometry>
+        </collision>
+
+        <visual name='visual'>
+            <geometry>
+                <box>
+                    <size>5.0 2.0 2.0</size>
+                </box>
+            </geometry>
+        </visual>
+    </link-->
+    <link name="left_wheel">
+        <pose><%= left_wheel_arr.join(" ") %></pose>
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius><%= wheel_radius %></radius>
+                    <length><%= wheel_length %></length>
+                </cylinder>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius><%= wheel_radius %></radius>
+                    <length><%= wheel_length %></length>
+                </cylinder>
+            </geometry>
+        </visual>
+    </link>
+    <link name="right_wheel">
+        <pose><%= right_wheel_arr.join(" ") %></pose>
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius><%= wheel_radius %></radius>
+                    <length><%= wheel_length %></length>
+                </cylinder>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius><%= wheel_radius %></radius>
+                    <length><%= wheel_length %></length>
+                </cylinder>
+            </geometry>
+        </visual>
+    </link>
+    <link name="left_disk">
+        <pose><%= left_disk_arr.join(" ") %></pose>
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius><%= disk_radius %></radius>
+                    <length><%= disk_length %></length>
+                </cylinder>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius><%= disk_radius %></radius>
+                    <length><%= disk_length %></length>
+                </cylinder>
+            </geometry>
+        </visual>
+    </link>
+    <link name="right_disk">
+        <pose><%= right_disk_arr.join(" ") %></pose>
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius><%= disk_radius %></radius>
+                    <length><%= disk_length %></length>
+                </cylinder>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius><%= disk_radius %></radius>
+                    <length><%= disk_length %></length>
+                </cylinder>
+            </geometry>
+        </visual>
+    </link>
+  </model>
+</sdf>

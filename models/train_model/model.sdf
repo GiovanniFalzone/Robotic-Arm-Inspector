@@ -1,0 +1,154 @@
+<?xml version="1.0" ?>
+
+<sdf version="1.5">
+  <model name="train_model">
+    <static>true</static> 
+    <link name="axis">
+        <pose>0.0 2.0 1.5 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius>0.2</radius>
+                    <length>4.0</length>
+                </cylinder>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius>0.2</radius>
+                    <length>4.0</length>
+                </cylinder>
+            </geometry>
+        </visual>
+    </link>
+    <link name='left_binary'>
+        <pose>0.0 0.0 0.0 0 0 0</pose>
+        <collision name='collision'>
+            <geometry>
+                <box>
+                    <size>2.0 0.4 1.0</size>
+                </box>
+            </geometry>
+        </collision>
+        <visual name='visual'>
+            <geometry>
+                <box>
+                    <size>2.0 0.4 1.0</size>
+                </box>
+            </geometry>
+        </visual>
+    </link>  
+    <link name='right_binary'>
+        <pose>0.0 4.0 0.0 0 0 0</pose>
+        <collision name='collision'>
+            <geometry>
+                <box>
+                    <size>2.0 0.4 1.0</size>
+                </box>
+            </geometry>
+        </collision>
+        <visual name='visual'>
+            <geometry>
+                <box>
+                    <size>2.0 0.4 1.0</size>
+                </box>
+            </geometry>
+        </visual>
+    </link>  
+    <!--link name='chassis'>   
+        <pose>0 0 2.0 0 0 0</pose>
+        <collision name='collision'>   
+            <geometry>
+                <box>
+                    <size>5.0 2.0 2.0</size>
+                </box>
+            </geometry>
+        </collision>
+
+        <visual name='visual'>
+            <geometry>
+                <box>
+                    <size>5.0 2.0 2.0</size>
+                </box>
+            </geometry>
+        </visual>
+    </link-->
+    <link name="left_wheel">
+        <pose>0.0 0.0 1.5 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius>1.0</radius>
+                    <length>0.4</length>
+                </cylinder>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius>1.0</radius>
+                    <length>0.4</length>
+                </cylinder>
+            </geometry>
+        </visual>
+    </link>
+    <link name="right_wheel">
+        <pose>0.0 4.0 1.5 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius>1.0</radius>
+                    <length>0.4</length>
+                </cylinder>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius>1.0</radius>
+                    <length>0.4</length>
+                </cylinder>
+            </geometry>
+        </visual>
+    </link>
+    <link name="left_disk">
+        <pose>0.0 1.3333333333333333 1.5 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius>0.5</radius>
+                    <length>0.2</length>
+                </cylinder>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius>0.5</radius>
+                    <length>0.2</length>
+                </cylinder>
+            </geometry>
+        </visual>
+    </link>
+    <link name="right_disk">
+        <pose>0.0 2.6666666666666665 1.5 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius>0.5</radius>
+                    <length>0.2</length>
+                </cylinder>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius>0.5</radius>
+                    <length>0.2</length>
+                </cylinder>
+            </geometry>
+        </visual>
+    </link>
+  </model>
+</sdf>
