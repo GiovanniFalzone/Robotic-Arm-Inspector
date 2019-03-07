@@ -1,5 +1,7 @@
 #!/usr/bin/python
 import sys
+import copy
+import math
 import rospy
 import moveit_commander
 import moveit_msgs.msg
@@ -54,25 +56,50 @@ class arm_inspector():
 		self.group_names = group_names
 		self.tolerance = 0.01
 
-	def move_in_pos(self, x, y, z, roll, pitch, yaw):
-		pos_goal = geometry_msgs.msg.Pose()
+	def check_tolerance(self, goal, actual):
+		all_equal = True
+		if type(goal) is list:
+			for index in range(len(goal)):
+				if abs(actual[index] - goal[index]) > self.tolerance:
+					return False
 
-		# get quaternion from rpy
+		elif type(goal) is geometry_msgs.msg.PoseStamped:
+			return self.check_tolerance(goal.pose, actual.pose)
+
+		elif type(goal) is geometry_msgs.msg.Pose:
+			return self.check_tolerance(pose_to_list(goal), pose_to_list(actual))
+
+		return True
+
+	def set_orientation_by_rpy(self, pos, roll=math.pi/2, pitch=0, yaw=0):
 		q = quaternion_from_euler(roll, pitch, yaw)
-		pos_goal.orientation.w = q[0]
-		pos_goal.orientation.x = q[1]
-		pos_goal.orientation.y = q[2]
-		pos_goal.orientation.z = q[3]
-		pos_goal.position.x = x
-		pos_goal.position.y = y
-		pos_goal.position.z = z
-		self.group.set_pose_target(pos_goal)
+		pos.orientation.w = q[0]
+		pos.orientation.x = q[1]
+		pos.orientation.y = q[2]
+		pos.orientation.z = q[3]
+		return pos
 
+	def get_pos_obj(self, x, y, z, roll, pitch, yaw):
+		pos = geometry_msgs.msg.Pose()
+		# get quaternion from rpy
+		pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
+		pos.position.x = x
+		pos.position.y = y
+		pos.position.z = z
+		return pos
+
+	def move_in_pos(self, pos):
+		print(pos)
+		self.group.set_pose_target(pos)
 		plan = self.group.go(wait=True)
 		self.group.stop() # to ensures that there is no residual movement
 		self.group.clear_pose_targets()
 		current_pos = self.group.get_current_pose().pose
-		return self.check_tolerance(pos_goal, current_pos)
+		return self.check_tolerance(pos, current_pos)
+
+	def move_in_xyz_rpy(self, x, y, z, roll, pitch, yaw):
+		pos_goal = self.get_pos_obj(x, y, z, roll, pitch, yaw)
+		self.move_in_pos(pos_goal)
 
 	def set_joint(self, a0, a1, a2, a3, a4, a5):
 		joint_goal = self.group.get_current_joint_values()
@@ -91,39 +118,56 @@ class arm_inspector():
 		# We want the Cartesian path to be interpolated at a resolution of 1 cm
 		# which is why we will specify 0.01 as the eef_step in Cartesian
 		# translation.  We will disable the jump threshold by setting it to 0.0 disabling:
-		(plan, fraction) = group.compute_cartesian_path(
+		(plan, fraction) = self.group.compute_cartesian_path(
 											points,   # waypoints to follow
 											0.01,        # eef_step
 											0.0)         # jump_threshold
 		self.group.execute(plan, wait=True)
 
-	def inspect_point(x, y, z):
-		radius = 0.2
-		num_points = 10
-		deg_step = 2*pi/num_points
+	def move_in_sleep_position(self):
+		self.set_joint(0, 0, 0, 0, 0, 0)
+
+	def move_in_waiting_position(self):
+
+		self.set_joint(0, -math.pi/4, 0, -math.pi/2, 0, -math.pi/4)
+
+	def move_in_checking_position(self):
+		self.move_in_xyz_rpy(0, 0.25, 1.9, math.pi/2, 0, 0)
+
+	def follow_points(self, points):
+		for pos in points:
+			self.move_in_pos(pos)
+
+	def inspect_point(self, x, y, z, radius=0.1, dist=0.1, num_points=10):
+		self.move_in_waiting_position()
+		y = y - dist
+		roll = math.pi/2
+		pitch = 0
+		yaw = 0
+		self.move_in_xyz_rpy(x, y, z, roll, pitch, yaw)
+		deg_step = 2*math.pi/num_points
 		points = []
 		pos = geometry_msgs.msg.Pose()
 		for i in range(0, num_points):
-			pos.position.y = y + radius*math.cos(i*deg_step)
+			pos.position.x = x + radius*math.cos(i*deg_step)
+			pos.position.y = y
 			pos.position.z = z + radius*math.sin(i*deg_step)
+			if(dist>0):
+				roll = math.pi/2 - math.atan(dist/radius)*math.cos(i*deg_step)
+				pitch = 0 - math.atan(dist/radius)*math.sin(i*deg_step)
+				yaw = 0
+			else:
+				roll = math.pi/2
+				pitch = 0
+				yaw = 0
+			pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
 			points.append(copy.deepcopy(pos))
-		move_in_points(points)
+		self.follow_points(points)
+		roll = math.pi/2
+		pitch = 0
+		yaw = 0
+		self.move_in_waiting_position()
 
-
-	def exec_plan(self, plan):
-		self.group.execute(plan, wait=True)
-
-	def check_tolerance(self, goal, actual):
-		all_equal = True
-		if type(goal) is list:
-			for index in range(len(goal)):
-				if abs(actual[index] - goal[index]) > self.tolerance:
-					return False
-
-		elif type(goal) is geometry_msgs.msg.PoseStamped:
-			return self.check_tolerance(goal.pose, actual.pose)
-
-		elif type(goal) is geometry_msgs.msg.Pose:
-			return self.check_tolerance(pose_to_list(goal), pose_to_list(actual))
-
-		return True
+# this method get a center position and radius of a circle and move to N points on the circle
+	def inspect_circle(self, x, y, z, radius=0.1, num_points=10):
+		self.inspect_point(x, y, z, radius, 0, num_points)

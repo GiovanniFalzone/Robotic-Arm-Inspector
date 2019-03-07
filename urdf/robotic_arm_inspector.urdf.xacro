@@ -8,11 +8,20 @@
   <!-- <xacro:include filename="$(find common_sensors)/urdf/sensors/kinect2.urdf.xacro" /> -->
 
   <link name="world" />
-  <joint name="base_arm" type="fixed">
+
+  <joint name="world_joint" type="fixed">
     <parent link="world" />
-    <child link = "base_link" />
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+    <child link = "cart" />
+    <origin xyz="0.0 0.0 1.0" rpy="0.0 0.0 0.0" />
   </joint>
+
+  <link name = "cart"/>
+  <joint name="cart_joint" type="fixed">
+    <parent link="cart" />
+    <child link = "base_link" />
+    <origin xyz="0.0 0.5 0.25" rpy="1.570796 0.0 1.570796" /> 
+  </joint>
+
 
   <xacro:ur5_robot prefix="" joint_limited="true"
     shoulder_pan_lower_limit="${-pi}" shoulder_pan_upper_limit="${pi}"
