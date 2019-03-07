@@ -36,8 +36,6 @@ def set_pad_status(pl):		# pads are little if they are in bad status
 			pad_length = el.getElementsByTagName("length")
 			for pad_l in pad_length:
 				pad_l.firstChild.nodeValue = pl
-		
-			
 
 def create_train_request(modelname, px, py, pz, rr, rp, ry, pl):
 	"""Create a SpawnModelRequest with the parameters of the train given.
@@ -63,23 +61,24 @@ def create_train_request(modelname, px, py, pz, rr, rp, ry, pl):
 
 	return req
 
-def spawn_notify():
-    pub = rospy.Publisher('chatter', String, queue_size=10)
-    rospy.init_node('spawner', anonymous=True)
-    if not rospy.is_shutdown():
-        hello_str = "hello"
-        pub.publish(hello_str)
-    
+def spawn_notify(pub):
+	if not rospy.is_shutdown():
+		hello_str = "4"
+		pub.publish(hello_str)
+
 if __name__ == '__main__':
 
 	# connection to spawn_sdf_model service of gazebo
-	rospy.init_node('spawn_models')
+	rospy.init_node('spawn_models', anonymous=True)
 	spawn_srv = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
 	rospy.loginfo("Waiting for /gazebo/spawn_sdf_model service...")
 	spawn_srv.wait_for_service()
 	rospy.loginfo("Connected to service!")
+
+	pub = rospy.Publisher('spawn_channel', String, queue_size=10)
 	
-	while 1:
+	
+	while True:
 		type=input("What type of train do you want to spawn? \n\t1 -> with good pads\n\t2 -> with bad pads\n\t0 -> EXIT\n")
 		if type == 1:
 			# Spawn train with good pads
@@ -101,6 +100,6 @@ if __name__ == '__main__':
 		
 		# notify the spawn on the channel
 		try:
-        	spawn_notify()
-    	except rospy.ROSInterruptException:
-        	pass
+			spawn_notify(pub)
+		except rospy.ROSInterruptException:
+			pass
