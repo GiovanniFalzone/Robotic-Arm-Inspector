@@ -79,13 +79,13 @@ class robot_motion_lib():
 		pos.orientation.z = q[3]
 		return pos
 
-	def get_pos_obj(self, x, y, z, roll, pitch, yaw):
+	def get_pos_obj(self, vect):
 		pos = geometry_msgs.msg.Pose()
 		# get quaternion from rpy
-		pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
-		pos.position.x = x
-		pos.position.y = y
-		pos.position.z = z
+		pos = self.set_orientation_by_rpy(pos, vect[2], vect[3], vect[4])
+		pos.position.x = vect[0]
+		pos.position.y = vect[1]
+		pos.position.z = vect[2]
 		return pos
 
 	def move_in_pos(self, pos):
@@ -97,22 +97,15 @@ class robot_motion_lib():
 		current_pos = self.group.get_current_pose().pose
 		return self.check_tolerance(pos, current_pos)
 
-	def move_in_xyz_rpy(self, x, y, z, roll, pitch, yaw):
-		pos_goal = self.get_pos_obj(x, y, z, roll, pitch, yaw)
+	def move_in_xyz_rpy(self, vect):
+		pos_goal = self.get_pos_obj(vect)
 		self.move_in_pos(pos_goal)
 
-	def set_joint(self, a0, a1, a2, a3, a4, a5):
-		joint_goal = self.group.get_current_joint_values()
-		joint_goal[0] = a0
-		joint_goal[1] = a1
-		joint_goal[2] = a2
-		joint_goal[3] = a3
-		joint_goal[4] = a4
-		joint_goal[5] = a5
-		self.group.go(joint_goal, wait=True)
+	def set_joint(self, joints_vect):
+		self.group.go(joints_vect, wait=True)
 		self.group.stop()
 		current_joints = self.group.get_current_joint_values()
-		return self.check_tolerance(joint_goal, current_joints)
+		return self.check_tolerance(joints_vect, current_joints)
 
 	def move_in_points(self, points):
 		# We want the Cartesian path to be interpolated at a resolution of 1 cm
@@ -128,7 +121,10 @@ class robot_motion_lib():
 		for pos in points:
 			self.move_in_pos(pos)
 
-	def follow_line(self, x, y, z, step_x, step_y, step_z, max_step,  roll=math.pi/2, pitch=0, yaw=0):
+	def follow_line(self, start_pos, step_x, step_y, step_z, max_step,  roll=math.pi/2, pitch=0, yaw=0):
+		x = start_pos[0]
+		y = start_pos[1]
+		z = start_pos[2]
 		points = []
 		pos = geometry_msgs.msg.Pose()
 		for i in range(0, max_step):
@@ -139,12 +135,14 @@ class robot_motion_lib():
 			points.append(copy.deepcopy(pos))
 		self.follow_points(points)
 
-	def follow_cone_base_y(self, x, y, z, radius=0.1, dist=0.1, angle=2*math.pi, clockwise=0, num_points=10):
-		y = y - dist
+	def follow_cone_base_y(self, vertex_pos, radius=0.1, dist=0.1, angle=2*math.pi, clockwise=0, num_points=10):
+		x = vertex_pos[0]
+		y = vertex_pos[1] - dist
+		z = vertex_pos[2]
 		roll = math.pi/2
 		pitch = 0
 		yaw = 0
-		self.move_in_xyz_rpy(x, y, z, roll, pitch, yaw)
+		self.move_in_xyz_rpy([x, y, z, roll, pitch, yaw])
 		direction = 1 - 2*clockwise
 		deg_step = angle/num_points
 		points = []
@@ -166,15 +164,17 @@ class robot_motion_lib():
 			points.append(copy.deepcopy(pos))
 		self.follow_points(points)
 
-	def follow_circle_y(self, x, y, z, radius=0.1, angle=2*math.pi, clockwise=0, num_points=10):
-		self.follow_cone_base_y(x, y, z, radius, 0, angle, clockwise, num_points)
+	def follow_circle_y(self, center_pos, radius=0.1, angle=2*math.pi, clockwise=0, num_points=10):
+		self.follow_cone_base_y(center_pos, radius, 0, angle, clockwise, num_points)
 
-	def follow_cone_base_x(self, x, y, z, radius=0.1, dist=0.1, angle=2*math.pi, clockwise=0, num_points=10):
-		x = x - dist
+	def follow_cone_base_x(self, vertex_pos, radius=0.1, dist=0.1, angle=2*math.pi, clockwise=0, num_points=10):
+		x = vertex_pos[0] - dist
+		y = vertex_pos[1]
+		z = vertex_pos[2]
 		roll = 0
 		pitch = 0
 		yaw = 0
-		self.move_in_xyz_rpy(x, y, z, roll, pitch, yaw)
+		self.move_in_xyz_rpy([x, y, z, roll, pitch, yaw])
 		direction = 1 - 2*clockwise
 		deg_step = angle/num_points
 		points = []
@@ -196,5 +196,5 @@ class robot_motion_lib():
 			points.append(copy.deepcopy(pos))
 		self.follow_points(points)
 
-	def follow_circle_x(self, x, y, z, radius=0.1, angle=2*math.pi, clockwise=0, num_points=10):
-		self.follow_cone_base_x(x, y, z, radius, 0, angle, clockwise, num_points)
+	def follow_circle_x(self, center_pos, radius=0.1, angle=2*math.pi, clockwise=0, num_points=10):
+		self.follow_cone_base_x(center_pos, radius, 0, angle, clockwise, num_points)
