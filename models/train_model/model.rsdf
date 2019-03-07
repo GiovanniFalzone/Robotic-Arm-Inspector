@@ -63,7 +63,7 @@
 
     #pads variables
     lp_x0 = rp_x0 = x0
-    lp_y0 = -3*pad_length/2 + axis_length/3
+    lp_y0 = axis_length/3 - disk_length/2 - pad_length/2
     lp_z0 = rp_z0 = z0
     lp_r = rp_r = roll
     lp_p = rp_p = pitch
@@ -71,7 +71,7 @@
 
     left_pad_arr = [lp_x0, lp_y0, lp_z0, lp_r, lp_p, lp_y]
 
-    rp_y0 = 3*pad_length/2 + axis_length*2/3
+    rp_y0 = axis_length*2/3 + disk_length/2 + pad_length/2
     right_pad_arr = [rp_x0, rp_y0, rp_z0, rp_r, rp_p, rp_y]
 
     #colors
@@ -229,7 +229,7 @@
                 </cylinder>
             </geometry>
             <material>
-                <ambient><%= green.join(" ") %></ambient>
+                <ambient><%= red.join(" ") %></ambient>
             </material>
         </visual>
     </link>
@@ -251,7 +251,7 @@
                 </cylinder>
             </geometry>
             <material>
-                <ambient><%= green.join(" ") %></ambient>
+                <ambient><%= red.join(" ") %></ambient>
             </material>
         </visual>
     </link>
