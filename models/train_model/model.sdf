@@ -56,24 +56,6 @@
             </geometry>
         </visual>
     </link>  
-    <!--link name='chassis'>   
-        <pose>0 0 2.0 0 0 0</pose>
-        <collision name='collision'>   
-            <geometry>
-                <box>
-                    <size>5.0 2.0 2.0</size>
-                </box>
-            </geometry>
-        </collision>
-
-        <visual name='visual'>
-            <geometry>
-                <box>
-                    <size>5.0 2.0 2.0</size>
-                </box>
-            </geometry>
-        </visual>
-    </link-->
     <link name="left_wheel">
         <pose>0.0 0.0 1.5 0.0 1.5707963267948966 1.5707963267948966</pose>
         <collision name="collision">
@@ -148,6 +130,50 @@
                     <length>0.2</length>
                 </cylinder>
             </geometry>
+        </visual>
+    </link>
+    <link name="left_pad">
+        <pose>0.0 1.1833333333333331 1.5 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius>0.5</radius>
+                    <length>0.1</length>
+                </cylinder>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius>0.5</radius>
+                    <length>0.1</length>
+                </cylinder>
+            </geometry>
+            <material>
+                <ambient>0.0 1.0 0.0 1</ambient>
+            </material>
+        </visual>
+    </link>
+    <link name="right_pad">
+        <pose>0.0 2.8166666666666664 1.5 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <collision name="collision">
+            <geometry>
+                <cylinder>
+                    <radius>0.5</radius>
+                    <length>0.1</length>
+                </cylinder>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+                <cylinder>
+                    <radius>0.5</radius>
+                    <length>0.1</length>
+                </cylinder>
+            </geometry>
+            <material>
+                <ambient>0.0 1.0 0.0 1</ambient>
+            </material>
         </visual>
     </link>
   </model>
