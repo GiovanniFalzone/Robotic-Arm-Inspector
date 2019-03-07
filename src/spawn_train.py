@@ -52,7 +52,7 @@ def create_train_request(modelname, px, py, pz, rr, rp, ry, pl):
 	req.model_xml = train
 	# req.initial_pose.position.x = px
 	# req.initial_pose.position.y = py
-	# req.initial_pose.position.z = pz
+	req.initial_pose.position.z = pz
 
 	# q = quaternion_from_euler(rr, rp, ry)
 	# req.initial_pose.orientation.x = q[0]
@@ -76,14 +76,14 @@ if __name__ == '__main__':
 			# Spawn train with good pads
 			rospy.loginfo("Spawning train with good pads")
 			req = create_train_request("train_good", 		# model name
-										0.0, 0.0, 0.0,		# train initial position
+										0.0, 0.0, 0.8,		# train initial position
 										0.0, 0.0, 0.0,		# train initial rotation
 										good_pad)  		# pads length (status)
 			spawn_srv.call(req)
 		elif type == 2:
 			rospy.loginfo("Spawning train with bad pads")
 			req = create_train_request("train_bad", 
-										0.0, 0.0, 0.0,
+										0.0, 0.0, 0.8,
 										0.0, 0.0, 0.0,
 										bad_pad) 
 			spawn_srv.call(req)
