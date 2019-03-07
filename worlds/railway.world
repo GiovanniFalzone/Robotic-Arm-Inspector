@@ -12,11 +12,5 @@
       <uri>model://sun</uri>
     </include>
 
-    <include>
-      <uri>model://train_model</uri>
-      <name>train chassis</name>
-      <pose>0.0 0.0 1.0 0.0 0.0 0.0</pose>
-    </include>
-
   </world>
 </sdf>

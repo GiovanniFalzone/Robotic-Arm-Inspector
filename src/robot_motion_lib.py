@@ -10,7 +10,7 @@ from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 from tf.transformations import quaternion_from_euler
 
-class arm_inspector():
+class robot_motion_lib():
 	def __init__(self):
 		moveit_commander.roscpp_initialize(sys.argv)
 		rospy.init_node('arm_inspector_move_node',	anonymous=True)
@@ -124,37 +124,39 @@ class arm_inspector():
 											0.0)         # jump_threshold
 		self.group.execute(plan, wait=True)
 
-	def move_in_sleep_position(self):
-		self.set_joint(0, 0, 0, 0, 0, 0)
-
-	def move_in_waiting_position(self):
-
-		self.set_joint(0, -math.pi/4, 0, -math.pi/2, 0, -math.pi/4)
-
-	def move_in_checking_position(self):
-		self.move_in_xyz_rpy(0, 0.25, 1.9, math.pi/2, 0, 0)
-
 	def follow_points(self, points):
 		for pos in points:
 			self.move_in_pos(pos)
 
-	def inspect_point(self, x, y, z, radius=0.1, dist=0.1, num_points=10):
-		self.move_in_waiting_position()
+	def follow_line(self, x, y, z, step_x, step_y, step_z, max_step,  roll=math.pi/2, pitch=0, yaw=0):
+		points = []
+		pos = geometry_msgs.msg.Pose()
+		for i in range(0, max_step):
+			pos.position.x = x + i*step_x
+			pos.position.y = y + i*step_y
+			pos.position.z = z + i*step_z
+			pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
+			points.append(copy.deepcopy(pos))
+		self.follow_points(points)
+
+	def follow_cone_base_y(self, x, y, z, radius=0.1, dist=0.1, angle=2*math.pi, clockwise=0, num_points=10):
 		y = y - dist
 		roll = math.pi/2
 		pitch = 0
 		yaw = 0
 		self.move_in_xyz_rpy(x, y, z, roll, pitch, yaw)
-		deg_step = 2*math.pi/num_points
+		direction = 1 - 2*clockwise
+		deg_step = angle/num_points
 		points = []
 		pos = geometry_msgs.msg.Pose()
 		for i in range(0, num_points):
-			pos.position.x = x + radius*math.cos(i*deg_step)
+			actual_deg = i*deg_step*direction
+			pos.position.x = x + radius*math.cos(actual_deg)
 			pos.position.y = y
-			pos.position.z = z + radius*math.sin(i*deg_step)
+			pos.position.z = z + radius*math.sin(actual_deg)
 			if(dist>0):
-				roll = math.pi/2 - math.atan(dist/radius)*math.cos(i*deg_step)
-				pitch = 0 - math.atan(dist/radius)*math.sin(i*deg_step)
+				roll = math.pi/2 - math.atan(dist/radius)*math.cos(actual_deg)
+				pitch = 0 - math.atan(dist/radius)*math.sin(actual_deg)
 				yaw = 0
 			else:
 				roll = math.pi/2
@@ -163,11 +165,36 @@ class arm_inspector():
 			pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
 			points.append(copy.deepcopy(pos))
 		self.follow_points(points)
-		roll = math.pi/2
+
+	def follow_circle_y(self, x, y, z, radius=0.1, angle=2*math.pi, clockwise=0, num_points=10):
+		self.follow_cone_base_y(x, y, z, radius, 0, angle, clockwise, num_points)
+
+	def follow_cone_base_x(self, x, y, z, radius=0.1, dist=0.1, angle=2*math.pi, clockwise=0, num_points=10):
+		x = x - dist
+		roll = 0
 		pitch = 0
 		yaw = 0
-		self.move_in_waiting_position()
+		self.move_in_xyz_rpy(x, y, z, roll, pitch, yaw)
+		direction = 1 - 2*clockwise
+		deg_step = angle/num_points
+		points = []
+		pos = geometry_msgs.msg.Pose()
+		for i in range(0, num_points):
+			actual_deg = i*deg_step*direction
+			pos.position.x = x
+			pos.position.y = y + radius*math.cos(actual_deg)
+			pos.position.z = z + radius*math.sin(actual_deg)
+			if(dist>0):
+				roll = 0 - math.atan(dist/radius)*math.cos(actual_deg)
+				pitch = 0 - math.atan(dist/radius)*math.sin(actual_deg)
+				yaw = 0
+			else:
+				roll = 0
+				pitch = 0
+				yaw = 0
+			pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
+			points.append(copy.deepcopy(pos))
+		self.follow_points(points)
 
-# this method get a center position and radius of a circle and move to N points on the circle
-	def inspect_circle(self, x, y, z, radius=0.1, num_points=10):
-		self.inspect_point(x, y, z, radius, 0, num_points)
+	def follow_circle_x(self, x, y, z, radius=0.1, angle=2*math.pi, clockwise=0, num_points=10):
+		self.follow_cone_base_x(x, y, z, radius, 0, angle, clockwise, num_points)
