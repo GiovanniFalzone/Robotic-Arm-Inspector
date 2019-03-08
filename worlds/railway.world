@@ -10,7 +10,10 @@
     <include>
       <uri>model://sun</uri>
     </include>
-
+    
+    <include>
+      <uri>model://binaries</uri>
+    </include>
 
     <!-- <plugin name="plugin_name" filename="libplugin.so"/> -->
     

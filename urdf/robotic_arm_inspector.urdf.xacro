@@ -16,10 +16,11 @@
   </joint>
 
   <link name = "cart"/>
+
   <joint name="cart_joint" type="fixed">
     <parent link="cart" />
     <child link = "base_link" />
-    <origin xyz="0.0 1.6 0.25" rpy="1.570796 0.0 1.570796" /> 
+    <origin xyz="0.0 0.7 0.0" rpy="1.570796 0.0 1.570796" /> 
   </joint>
 
 

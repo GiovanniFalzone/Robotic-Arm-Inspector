@@ -51,6 +51,15 @@ class train_inspector():
 		axis_center_pos = self.train_description.get('axis').get('position')
 		axis_lenght = self.train_description.get('axis').get('lenght')
 		start_pos = axis_center_pos
-		start_pos[1] -=  axis_lenght/2
+		start_pos[1] -= axis_lenght/2
+		start_pos[2] -=	1
 		self.motion_lib.follow_line(start_pos, 0, 0.1, 0, 20,  math.pi/2, math.pi/2, 0)
+
+	def check_train(self, train_desc):
+		self.train_description = train_desc
+		print self.train_description
+		self.move_in_sleep_position()
+		self.move_in_waiting_position()
+		self.inspect_axis()
+		self.inspect_pads()
 
