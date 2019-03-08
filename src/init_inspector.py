@@ -1,10 +1,11 @@
 #!/usr/bin/python
 import rospy
 from math import pi
-from arm_inspector import *
+from train_inspector import *
 from std_msgs.msg import String
 
-inspector = arm_inspector()
+motion_lib = robot_motion_lib()
+inspector = train_inspector()
     
 def callback(data):
 	rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
@@ -18,9 +19,20 @@ def callback(data):
 	elif('3' in cmd):
 		inspector.move_in_checking_position()
 	elif('4' in cmd):
-		inspector.inspect_circle(0, 0.25, 1.7, 0.1, 5)
+		motion_lib.follow_circle_y([0, 2, 1.7], 0.1, math.pi, 1, 5)
 	elif('5' in cmd):
-		inspector.inspect_point(0, 0.5, 1.7, 0.2, 0.2, 5)
+		motion_lib.follow_cone_base_y([0, 2, 1.7], 0.2, 0.2, math.pi, 1, 5)
+	elif('6' in cmd):
+		motion_lib.follow_line([0, 1.5, 1.5], 0, 0.02, 0, 10)
+	elif('7' in cmd):
+		motion_lib.follow_circle_x([0, 2, 1.7], 0.1, math.pi, 1, 5)
+	elif('8' in cmd):
+		motion_lib.follow_cone_base_x([0, 2, 1.7], 0.2, 0.2, math.pi, 1, 5)
+	elif('axis' in cmd):
+		inspector.inspect_axis()
+	elif('pad' in cmd):
+		inspector.inspect_pads()
+
 	else:
 		print('Wrong input \n')
 
