@@ -8,13 +8,21 @@ from copy import deepcopy
 from xml.dom import minidom														# to parse sdf model
 import json
 
-z0 = 1
+from train_model_parser import *
+
+train_model = train_model()
+
+# global variables
+# a pad is considered "good" or "bad" w.r.t. its width
+good_pad_width = 0.2		
+bad_pad_width = 0.05
+
 
 message = { 
 	'cmd':'check',
 	'train_description':{
 		'axis':{
-			'position':[0, 1.5, z0],
+			'position':[0, 1.5, 0],
 			'lenght':3.0,
 			'pads':{
 				'num':2,
@@ -30,49 +38,50 @@ message = {
 	}
 }
 
-#json.dump(message)
+# MODELS_DIR = "/home/rob/catkin_ws/src/robotic_arm_inspector/models/"
+# sdf_train = minidom.parse(MODELS_DIR + "train_model/model.sdf")
 
-MODELS_DIR = "/home/rob/catkin_ws/src/robotic_arm_inspector/models/"
-sdf_train = minidom.parse(MODELS_DIR + "train_model/model.sdf")
+def set_pad_status(pw):		# pads are little if they are in bad status
 
-# global variables
-good_pad = 0.2		#length of pad in good status
-bad_pad = 0.05
-lpad_offset = 1.2
-rpad_offset = 1.8
+	train_model.set_pads_width(pw, pw)
+	
+	left_pad_pos = train_model.get_pad_position("left", pw)
+	right_pad_pos = train_model.get_pad_position("right", pw)
+	message["train_description"]["axis"]["pads"]["coordinates"] = [left_pad_pos, right_pad_pos]
 
-def set_pad_status(pl):		# pads are little if they are in bad status
-	links = sdf_train.getElementsByTagName("link")
-	lpad_y = lpad_offset + pl/2
-	rpad_y = rpad_offset - pl/2
-	print message
-	message["train_description"]["axis"]["pads"]["coordinates"] = [[0.0, lpad_y, 2.0], [0.0, rpad_y, 2.0]]
-	print message	
-	for el in links:
-		if el.getAttribute('name') == "left_pad":		# find left pad
-			pad_poses = el.getElementsByTagName("pose")	# pose is based on pad length (status)
-			pad_poses[0].firstChild.nodeValue = "0.0 "+ str(lpad_y) +" 2.0 0.0 1.5707963267948966 1.5707963267948966"
+	# links = train_model.get_links()
+	# lpad_y = pl/2
+	# rpad_y = pl/2
+	# message["train_description"]["axis"]["pads"]["coordinates"] = [[0.0, lpad_y, 2.0], [0.0, rpad_y, 2.0]]
+	# for el in links:
+	# 	if train_model.check_attribute(el, "name", "left_pad"):		# find left pad
 
-			pad_length = el.getElementsByTagName("length")
-			for pad_l in pad_length:
-				pad_l.firstChild.nodeValue = pl
+	# 		#pad_poses = el.getElementsByTagName("pose")
+	# 		pad_pose = train_model.get_pose(el)
+	# 		pad_pose_value = "0.0 " + str(lpad_y) + " 2.0 " + rotation_string + ""
+	# 		train_model.set_value(pad_pose[0], pad_pose_value)
+	# 		#pad_poses[0].firstChild.nodeValue = "0.0 "+ str(lpad_y) +" 2.0 0.0 1.5707963267948966 1.5707963267948966"
+	# 		pad_width = train_model.get_length(el)
 
-		elif  el.getAttribute('name') == "right_pad":
-			pad_poses = el.getElementsByTagName("pose")	# pose is based on pad length (status)
-			pad_poses[0].firstChild.nodeValue = "0.0 "+ str(rpad_y) +" 2.0 0.0 1.5707963267948966 1.5707963267948966"
+	# 		for pad_l in pad_width:
+	# 			train_model.set_value(pad_l, pl)
 
-			pad_length = el.getElementsByTagName("length")
-			for pad_l in pad_length:
-				pad_l.firstChild.nodeValue = pl
+	# 	elif  el.getAttribute('name') == "right_pad":
+	# 		pad_poses = el.getElementsByTagName("pose")	# pose is based on pad length (status)
+	# 		pad_poses[0].firstChild.nodeValue = "0.0 "+ str(rpad_y) +" 2.0 0.0 1.5707963267948966 1.5707963267948966"
 
-def create_train_request(modelname, px, py, pz, rr, rp, ry, pl):
+	# 		pad_length = el.getElementsByTagName("length")
+	# 		for pad_l in pad_length:
+	# 			pad_l.firstChild.nodeValue = pl
+
+def create_train_request(modelname, px, py, pz, pw):
 	"""Create a SpawnModelRequest with the parameters of the train given.
 	modelname: name of the model for gazebo
 	px py pz: position of the cube (and it's collision cube)
 	rr rp ry: rotation (roll, pitch, yaw) of the model"""
-	set_pad_status(pl)
+	set_pad_status(pw)
 
-	train = deepcopy(sdf_train.documentElement.toxml())
+	train = deepcopy(train_model.get_sdf())
 
 	req = SpawnModelRequest()
 	req.model_name = modelname
@@ -80,12 +89,6 @@ def create_train_request(modelname, px, py, pz, rr, rp, ry, pl):
 	req.initial_pose.position.x = px
 	req.initial_pose.position.y = py
 	req.initial_pose.position.z = pz
-
-	# q = quaternion_from_euler(rr, rp, ry)
-	# req.initial_pose.orientation.x = q[0]
-	# req.initial_pose.orientation.y = q[1]
-	# req.initial_pose.orientation.z = q[2]
-	# req.initial_pose.orientation.w = q[3]
 
 	return req
 
@@ -114,15 +117,13 @@ if __name__ == '__main__':
 			rospy.loginfo("Spawning train with good pads")
 			req = create_train_request("train_good", 		# model name
 										0.0, 0.0, 0.0,		# train initial position
-										0.0, 0.0, 0.0,		# train initial rotation
-										good_pad)  		# pads length (status)
+										good_pad_width)  		# pads length (status)
 			spawn_srv.call(req)
 		elif type == 2:
 			rospy.loginfo("Spawning train with bad pads")
 			req = create_train_request("train_bad", 
 										0.0, 0.0, 0.0,
-										0.0, 0.0, 0.0,
-										bad_pad) 
+										bad_pad_width) 
 			spawn_srv.call(req)
 		else:	
 			break

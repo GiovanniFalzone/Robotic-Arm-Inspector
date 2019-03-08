@@ -12,7 +12,7 @@
     </include>
     
     <include>
-      <uri>model://binaries</uri>
+      <uri>model://tracks</uri>
     </include>
 
     <!-- <plugin name="plugin_name" filename="libplugin.so"/> -->

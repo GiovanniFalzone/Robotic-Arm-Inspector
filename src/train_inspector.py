@@ -57,7 +57,6 @@ class train_inspector():
 
 	def check_train(self, train_desc):
 		self.train_description = train_desc
-		print self.train_description
 		self.move_in_sleep_position()
 		self.move_in_waiting_position()
 		self.inspect_axis()

@@ -1,95 +1,75 @@
 <?xml version="1.0" ?>
 <%
+# radius or height refer to z axis
+# width refers to y axis
+# length refers to x axis
+
     wheel_radius = 1.0
-    wheel_length = 0.4
+    wheel_width = 0.4
     axis_radius = 0.1
-    axis_length = 3.0
-    disk_length = wheel_length/5
+    axis_width = 3.0
+    disk_width = wheel_width/5
     disk_radius = wheel_radius/4
-    pad_length = wheel_length/4
-    pad_radius = wheel_radius/4
+
+    #default value for pads, will be changed to simulate "bad" or "good" pads
+    pad_width = wheel_width/4
+    pad_radius = disk_radius
     
     bin_height = 1.0
-    bin_width = wheel_length
-    bin_length = 2*wheel_radius
 
     no_rotation = [0, 0, 0]
 
-    #global variables for positions and rotations
+    # global variables for coordinates of the origin and for rotations
+    # each element is positioned w.r.t. the tracks and shifted on y axes w.r.t. the wheels
+    # x and z coordinates will be the same for each link, whereas y will change
     x0 = 0.0
-    z0 = wheel_radius+bin_height #wheel should touch binary
+    z0 = wheel_radius + bin_height
     y0 = 0.0
     roll = 0.0
     pitch = Math::PI/2
     yaw = Math::PI/2
 
-    initial_pos_left = [x0, y0, bin_height/2]
-    initial_pos_right = [x0, axis_length, bin_height/2]
-
     #wheel variables
-    lw_x0 = rw_x0 = x0
     lw_y0 = 0.0
-    lw_z0 = rw_z0 = z0
-    lw_r = rw_r = roll
-    lw_p = rw_p = pitch
-    lw_y = rw_y = yaw
-    
-    left_wheel_arr = [lw_x0, lw_y0, lw_z0, lw_r, lw_p, lw_y] 
+    left_wheel_arr = [x0, lw_y0, z0, roll, pitch, yaw]
 
-    rw_y0 = axis_length    
-    right_wheel_arr = [rw_x0, rw_y0, rw_z0, rw_r, rw_p, rw_y] 
-
-    #disk variables
-    ld_x0 = rd_x0 = x0
-    ld_y0 = axis_length/3
-    ld_z0 = rd_z0 = z0
-    ld_r = rd_r = roll
-    ld_p = rd_p = pitch
-    ld_y = rd_y = yaw
-
-    left_disk_arr = [ld_x0, ld_y0, ld_z0, ld_r, ld_p, ld_y]
-
-    rd_y0 = axis_length*2/3
-    right_disk_arr = [rd_x0, rd_y0, rd_z0, rd_r, rd_p, rd_y]
+    rw_y0 = axis_width    
+    right_wheel_arr = [x0, rw_y0, z0,roll, pitch, yaw] 
 
     #axis variables
-    ax_x0 = x0
     ax_y0 = (rw_y0 - lw_y0)/2
-    ax_z0 = z0
-    ax_r = roll
-    ax_p = pitch
-    ax_y = yaw 
+    axis_arr = [x0, ax_y0, z0, roll, pitch, yaw] 
 
-    axis_arr = [ax_x0, ax_y0, ax_z0, ax_r, ax_p, ax_y] 
+    #disk variables
+    ld_y0 = axis_width/3
+    left_disk_arr = [x0, ld_y0, z0, roll, pitch, yaw]
+    
+    rd_y0 = axis_width*2/3
+    right_disk_arr = [x0, rd_y0, z0, roll, pitch, yaw]
 
     #pads variables
-    lp_x0 = rp_x0 = x0
-    lp_y0 = axis_length/3 - disk_length/2 - pad_length/2
-    lp_z0 = rp_z0 = z0
-    lp_r = rp_r = roll
-    lp_p = rp_p = pitch
-    lp_y = rp_y = yaw
+    lp_y0 = axis_width/3 + disk_width/2 + pad_width/2
+    left_pad_arr = [x0, lp_y0, z0, roll, pitch, yaw]
 
-    left_pad_arr = [lp_x0, lp_y0, lp_z0, lp_r, lp_p, lp_y]
-
-    rp_y0 = axis_length*2/3 + disk_length/2 + pad_length/2
-    right_pad_arr = [rp_x0, rp_y0, rp_z0, rp_r, rp_p, rp_y]
+    rp_y0 = axis_width*2/3 - disk_width/2 - pad_width/2
+    right_pad_arr = [x0, rp_y0, z0, roll, pitch, yaw]
 
     #colors
     red = [1.0, 0.0, 0.0, 1]
     green = [0.0, 1.0, 0.0, 1]
 
 %>
+
 <sdf version="1.5">
   <model name="train_model">
-    <static>true</static> 
+    <static>true</static>   <!-- train must be unmovable -->
     <link name="axis">
         <pose><%= axis_arr.join(" ") %></pose>
         <collision name="collision">
             <geometry>
                 <cylinder>
                     <radius><%= axis_radius %></radius>
-                    <length><%= axis_length %></length>
+                    <length><%= axis_width %></length>
                 </cylinder>
             </geometry>
         </collision>
@@ -97,52 +77,18 @@
             <geometry>
                 <cylinder>
                     <radius><%= axis_radius %></radius>
-                    <length><%= axis_length %></length>
+                    <length><%= axis_width %></length>
                 </cylinder>
             </geometry>
         </visual>
     </link>
-    <!-- <link name='left_binary'>
-        <pose><%= initial_pos_left.join(" ")%> <%= no_rotation.join(" ")%></pose>
-        <collision name='collision'>
-            <geometry>
-                <box>
-                    <size><%= bin_length %> <%= bin_width %> <%= bin_height %></size>
-                </box>
-            </geometry>
-        </collision>
-        <visual name='visual'>
-            <geometry>
-                <box>
-                    <size><%= bin_length %> <%= bin_width %> <%= bin_height %></size>
-                </box>
-            </geometry>
-        </visual>
-    </link>  
-    <link name='right_binary'>
-        <pose><%= initial_pos_right.join(" ")%> <%= no_rotation.join(" ")%></pose>
-        <collision name='collision'>
-            <geometry>
-                <box>
-                    <size><%= bin_length %> <%= bin_width %> <%= bin_height %></size>
-                </box>
-            </geometry>
-        </collision>
-        <visual name='visual'>
-            <geometry>
-                <box>
-                    <size><%= bin_length %> <%= bin_width %> <%= bin_height %></size>
-                </box>
-            </geometry>
-        </visual>
-    </link>   -->
     <link name="left_wheel">
         <pose><%= left_wheel_arr.join(" ") %></pose>
         <collision name="collision">
             <geometry>
                 <cylinder>
                     <radius><%= wheel_radius %></radius>
-                    <length><%= wheel_length %></length>
+                    <length><%= wheel_width %></length>
                 </cylinder>
             </geometry>
         </collision>
@@ -150,7 +96,7 @@
             <geometry>
                 <cylinder>
                     <radius><%= wheel_radius %></radius>
-                    <length><%= wheel_length %></length>
+                    <length><%= wheel_width %></length>
                 </cylinder>
             </geometry>
         </visual>
@@ -161,7 +107,7 @@
             <geometry>
                 <cylinder>
                     <radius><%= wheel_radius %></radius>
-                    <length><%= wheel_length %></length>
+                    <length><%= wheel_width %></length>
                 </cylinder>
             </geometry>
         </collision>
@@ -169,7 +115,7 @@
             <geometry>
                 <cylinder>
                     <radius><%= wheel_radius %></radius>
-                    <length><%= wheel_length %></length>
+                    <length><%= wheel_width %></length>
                 </cylinder>
             </geometry>
         </visual>
@@ -180,7 +126,7 @@
             <geometry>
                 <cylinder>
                     <radius><%= disk_radius %></radius>
-                    <length><%= disk_length %></length>
+                    <length><%= disk_width %></length>
                 </cylinder>
             </geometry>
         </collision>
@@ -188,7 +134,7 @@
             <geometry>
                 <cylinder>
                     <radius><%= disk_radius %></radius>
-                    <length><%= disk_length %></length>
+                    <length><%= disk_width %></length>
                 </cylinder>
             </geometry>
         </visual>
@@ -199,7 +145,7 @@
             <geometry>
                 <cylinder>
                     <radius><%= disk_radius %></radius>
-                    <length><%= disk_length %></length>
+                    <length><%= disk_width %></length>
                 </cylinder>
             </geometry>
         </collision>
@@ -207,7 +153,7 @@
             <geometry>
                 <cylinder>
                     <radius><%= disk_radius %></radius>
-                    <length><%= disk_length %></length>
+                    <length><%= disk_width %></length>
                 </cylinder>
             </geometry>
         </visual>
@@ -218,7 +164,7 @@
             <geometry>
                 <cylinder>
                     <radius><%= pad_radius %></radius>
-                    <length><%= pad_length %></length>
+                    <length><%= pad_width %></length>
                 </cylinder>
             </geometry>
         </collision>
@@ -226,7 +172,7 @@
             <geometry>
                 <cylinder>
                     <radius><%= pad_radius %></radius>
-                    <length><%= pad_length %></length>
+                    <length><%= pad_width %></length>
                 </cylinder>
             </geometry>
             <material>
@@ -240,7 +186,7 @@
             <geometry>
                 <cylinder>
                     <radius><%= pad_radius %></radius>
-                    <length><%= pad_length %></length>
+                    <length><%= pad_width %></length>
                 </cylinder>
             </geometry>
         </collision>
@@ -248,7 +194,7 @@
             <geometry>
                 <cylinder>
                     <radius><%= pad_radius %></radius>
-                    <length><%= pad_length %></length>
+                    <length><%= pad_width %></length>
                 </cylinder>
             </geometry>
             <material>
