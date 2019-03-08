@@ -1,23 +1,17 @@
 #!/usr/bin/python
+import rospy
 from math import pi
 from train_inspector import *
+from std_msgs.msg import String
 
 motion_lib = robot_motion_lib()
 inspector = train_inspector()
-
-def main():
-	msg = 'Press \n\
-	\t-> 1 to move in initial position \n\
-	\t-> 2 to move in max estension position \n\
-	\t-> 3 to move in checking position \n\
-	\t-> 4 follow circle y\n\
-	\t-> 5 follow cone y\n\
-	\t-> 6 follow line x\n\
-	\t-> 7 follow circle x\n\
-	\t-> 8 follow cone\n\
-	\t-> axis to check axis\n\
-	\t-> pad to check pads\n'
-	cmd = raw_input(msg)
+    
+def callback(data):
+	rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
+	cmd = data.data
+	# msg = 'Press \n\t-> 1 to move in initial position \n\t-> 2 to move in max estension position \n\t-> 3 to move in checking position \n\t-> 4 to inspect circle\n\t-> 5 to inspect point\n'
+	# cmd = raw_input(msg)
 	if('1' in cmd):
 		inspector.move_in_sleep_position()
 	elif('2' in cmd):
@@ -42,13 +36,16 @@ def main():
 	else:
 		print('Wrong input \n')
 
-if __name__ == '__main__':
-	while(True):
-		try:
-			main()
-		except rospy.ROSInterruptException:
-			print('rospy exception')
-			break
-		except KeyboardInterrupt:
-			print('keyboard interrupt')
-			break
+if __name__ == '__main__':	
+	rospy.Subscriber("spawn_channel", String, callback)
+	print('Waiting for message on spawn channel\n')
+	rospy.spin()
+	# while(True):
+	# 	try:
+	# 		main()
+	# 	except rospy.ROSInterruptException:
+	# 		print('rospy exception')
+	# 		break
+	# 	except KeyboardInterrupt:
+	# 		print('keyboard interrupt')
+	# 		break
