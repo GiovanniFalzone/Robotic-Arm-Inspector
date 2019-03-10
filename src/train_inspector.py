@@ -7,13 +7,13 @@ class train_inspector():
 		self.motion_lib = robot_motion_lib()
 		self.train_description = {
 			'axis':{
-				'position':[0, 2, 1.7],
+				'position':[0, 1.5, 1.7],
 				'lenght':2,
 				'pads':{
 					'num':2,
 					'coordinates':[
-						[0, 1.00, 1.7],
-						[0, 2.00, 1.7]
+						[0, 1.25, 1.5],
+						[0, 1.75, 1.5]
 					],
 					'disk':{
 						'radius': 1,
@@ -52,7 +52,7 @@ class train_inspector():
 		axis_lenght = self.train_description.get('axis').get('lenght')
 		start_pos = axis_center_pos
 		start_pos[1] -= axis_lenght/2
-		start_pos[2] -=	1
+		start_pos[2] -=	0.2
 		self.motion_lib.follow_line(start_pos, 0, 0.1, 0, 20,  math.pi/2, math.pi/2, 0)
 
 	def check_train(self, train_desc):
