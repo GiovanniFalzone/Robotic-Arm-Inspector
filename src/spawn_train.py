@@ -7,6 +7,7 @@ from copy import deepcopy
 #from tf.transformations import quaternion_from_euler
 from xml.dom import minidom														# to parse sdf model
 import json
+from os.path import expanduser
 
 z0 = 1
 
@@ -31,8 +32,8 @@ message = {
 }
 
 #json.dump(message)
-
-MODELS_DIR = "/home/rob/catkin_ws/src/robotic_arm_inspector/models/"
+home = expanduser("~")
+MODELS_DIR = home + "/catkin_ws/src/robotic_arm_inspector/models/"
 sdf_train = minidom.parse(MODELS_DIR + "train_model/model.sdf")
 
 # global variables
