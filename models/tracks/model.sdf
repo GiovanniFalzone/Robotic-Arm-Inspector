@@ -23,7 +23,7 @@
 					</box>
 				</geometry>
 				<material>
-        	<ambient>1.0 1.0 1.0 1</ambient>
+        	<ambient>0.0 0.0 0.0 1</ambient>
         </material>
 			</visual>
 		</link>  
@@ -43,7 +43,7 @@
 					</box>
 				</geometry>
 					<material>
-            <ambient>1.0 1.0 1.0 1</ambient>
+            <ambient>0.0 0.0 0.0 1</ambient>
         	</material>
 			</visual>
 		</link>

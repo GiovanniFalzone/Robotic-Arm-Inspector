@@ -1,7 +1,7 @@
 from xml.dom import minidom
 from math import pi
 
-MODELS_DIR = "/home/rob/catkin_ws/src/robotic_arm_inspector/models/"
+MODELS_DIR = "../models/"
 rotation_string = "0.0 " + str(pi/2) + " " + str(pi/2) +" "
 
 class train_model():
