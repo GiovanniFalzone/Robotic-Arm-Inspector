@@ -47,7 +47,7 @@ class train_inspector():
 		
 	def inspect_axis(self):
 		axis_center_pos = self.train_description.get('axis').get('position')
-		axis_lenght = self.train_description.get('axis').get('lenght')
+		axis_lenght = self.train_description.get('axis').get('lenght') - 1
 		dist = self.train_description.get('axis').get('pads').get('disk').get('radius') + 0.1
 		start_pos = axis_center_pos
 		start_pos[1] -= axis_lenght/2

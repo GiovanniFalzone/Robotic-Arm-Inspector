@@ -1,7 +1,9 @@
 from xml.dom import minidom
 from math import pi
+from os.path import expanduser
 
-MODELS_DIR = "../models/"
+home = expanduser("~")
+MODELS_DIR = home+"/catkin_ws/src/robotic_arm_inspector/models/"
 rotation_string = "0.0 " + str(pi/2) + " " + str(pi/2) +" "
 
 class train_model():

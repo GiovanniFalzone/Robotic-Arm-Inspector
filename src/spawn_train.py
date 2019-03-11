@@ -7,7 +7,6 @@ from copy import deepcopy
 #from tf.transformations import quaternion_from_euler
 from xml.dom import minidom														# to parse sdf model
 import json
-from os.path import expanduser
 
 from train_model_parser import *
 
@@ -23,16 +22,16 @@ message = {
 	'cmd':'check',
 	'train_description':{
 		'axis':{
-			'position':[0, 1.5, 0],
+			'position':[0, 1.5, 2.0],
 			'lenght':3.0,
 			'pads':{
 				'num':2,
 				'coordinates':[
-					[0, 0, 0],
-					[0, 0, 0]
+					[0, 1.0, 2.0],
+					[0, 2.0, 2.0]
 				],
 				'disk':{
-					'radius': 0.5,
+					'radius': 0.25,
 				},
 			}
 		}
