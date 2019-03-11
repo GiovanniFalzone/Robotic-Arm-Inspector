@@ -12,7 +12,7 @@
   <joint name="world_joint" type="fixed">
     <parent link="world" />
     <child link = "cart" />
-    <origin xyz="0.0 0.0 1.0" rpy="0.0 0.0 0.0" />
+    <origin xyz="0.0 0.0 1.0"/> 
   </joint>
 
   <link name = "cart"/>
@@ -20,7 +20,7 @@
   <joint name="cart_joint" type="fixed">
     <parent link="cart" />
     <child link = "base_link" />
-    <origin xyz="0.0 0.7 0.0" rpy="1.570796 0.0 1.570796" /> 
+    <origin xyz="0.0 1.5 0.0"  rpy="1.570796 0.0 1.570796"/> 
   </joint>
 
 

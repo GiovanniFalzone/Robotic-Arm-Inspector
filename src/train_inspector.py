@@ -7,16 +7,13 @@ class train_inspector():
 		self.motion_lib = robot_motion_lib()
 		self.train_description = {
 			'axis':{
-				'position':[0, 2, 1.7],
+				'position':[0, 1.5, 2],
 				'lenght':2,
 				'pads':{
 					'num':2,
-					'coordinates':[
-						[0, 1.00, 1.7],
-						[0, 2.00, 1.7]
-					],
+					'coordinates': [[0.0, 1.3, 2.0], [0.0, 1.7, 2.0]],
 					'disk':{
-						'radius': 1,
+						'radius': 0.5,
 					},
 				}
 			}
@@ -43,17 +40,20 @@ class train_inspector():
 
 	def inspect_pads(self):
 		pads_pos = self.train_description.get('axis').get('pads').get('coordinates')
+		dist = self.train_description.get('axis').get('pads').get('disk').get('radius') + 0.1
 		print(pads_pos)
 		for pos in pads_pos:
-			self.motion_lib.follow_cone_base_x(pos, 0.1, 0.1, 2*math.pi, 1, 10)
+			self.motion_lib.follow_cone_base_z(pos, 0.1, dist, 2*math.pi, 1, 5)
 		
 	def inspect_axis(self):
 		axis_center_pos = self.train_description.get('axis').get('position')
 		axis_lenght = self.train_description.get('axis').get('lenght')
+		dist = self.train_description.get('axis').get('pads').get('disk').get('radius') + 0.1
 		start_pos = axis_center_pos
 		start_pos[1] -= axis_lenght/2
-		start_pos[2] -=	1
-		self.motion_lib.follow_line(start_pos, 0, 0.1, 0, 20,  math.pi/2, math.pi/2, 0)
+		n_step = 5
+		step = (float(axis_lenght)/float(n_step))
+		self.motion_lib.follow_line(start_pos, 0, step, 0, n_step, dist, math.pi/2, math.pi/2, 0)
 
 	def check_train(self, train_desc):
 		self.train_description = train_desc

@@ -7,6 +7,7 @@ from copy import deepcopy
 #from tf.transformations import quaternion_from_euler
 from xml.dom import minidom														# to parse sdf model
 import json
+from os.path import expanduser
 
 from train_model_parser import *
 

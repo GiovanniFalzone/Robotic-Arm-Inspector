@@ -121,7 +121,7 @@ class robot_motion_lib():
 		for pos in points:
 			self.move_in_pos(pos)
 
-	def follow_line(self, start_pos, step_x, step_y, step_z, max_step,  roll=math.pi/2, pitch=0, yaw=0):
+	def follow_line(self, start_pos, step_x, step_y, step_z, max_step, dist=0.1, roll=math.pi/2, pitch=0, yaw=0):
 		x = start_pos[0]
 		y = start_pos[1]
 		z = start_pos[2]
@@ -130,7 +130,36 @@ class robot_motion_lib():
 		for i in range(0, max_step):
 			pos.position.x = x + i*step_x
 			pos.position.y = y + i*step_y
-			pos.position.z = z + i*step_z
+			pos.position.z = z + i*step_z - dist
+			pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
+			points.append(copy.deepcopy(pos))
+		self.follow_points(points)
+
+	def follow_cone_base_z(self, vertex_pos, radius=0.1, dist=0.1, angle=2*math.pi, clockwise=0, num_points=10):
+		x = vertex_pos[0]
+		y = vertex_pos[1]
+		z = vertex_pos[2] - dist
+		roll = math.pi/2
+		pitch = 0
+		yaw = 0
+		self.move_in_xyz_rpy([x, y, z, roll, pitch, yaw])
+		direction = 1 - 2*clockwise
+		deg_step = angle/num_points
+		points = []
+		pos = geometry_msgs.msg.Pose()
+		for i in range(0, num_points):
+			actual_deg = i*deg_step*direction
+			pos.position.x = x + radius*math.cos(actual_deg)
+			pos.position.y = y
+			pos.position.z = z + radius*math.sin(actual_deg)
+			if(dist>0):
+				roll = math.pi/2 - math.atan(dist/radius)*math.cos(actual_deg)
+				pitch = 0 - math.atan(dist/radius)*math.sin(actual_deg)
+				yaw = 0
+			else:
+				roll = math.pi/2
+				pitch = 0
+				yaw = 0
 			pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
 			points.append(copy.deepcopy(pos))
 		self.follow_points(points)
