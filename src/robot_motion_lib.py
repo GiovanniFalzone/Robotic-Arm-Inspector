@@ -152,23 +152,26 @@ class robot_motion_lib():
 		points = []
 		pos = geometry_msgs.msg.Pose()
 		for i in range(0, num_points):
-			actual_deg = i*deg_step*direction
+			actual_deg = i*deg_step
 			pos.position.x = x + radius*math.cos(actual_deg)
 			pos.position.y = y + radius*math.sin(actual_deg)
 			pos.position.z = z
+			roll = 0
+			yaw = 0
 			if(dir_sign<0):
 				pitch = -math.pi/2
 			else:
 				pitch = math.pi/2
-			roll = 0
-			yaw = actual_deg
+
 			if(dist>0):
 				if(dir_sign<0):
-					roll = (-math.pi/2) + max_sensor_angle*math.cos(actual_deg)
-					pitch = 0 - max_sensor_angle*math.sin(actual_deg)
-				else :
-					roll = max_sensor_angle*math.sin(actual_deg)
-					pitch = math.pi/2 - max_sensor_angle*math.cos(actual_deg)
+					roll = 2*math.pi - actual_deg
+					pitch = math.pi - (math.pi + max_sensor_angle)
+					yaw = 0
+				else:
+					roll = 2*math.pi - actual_deg
+					pitch = math.pi + (math.pi + max_sensor_angle)
+					yaw = math.pi
 
 			pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
 			points.append(copy.deepcopy(pos))
@@ -192,12 +195,12 @@ class robot_motion_lib():
 			pos.position.x = x + radius*math.cos(actual_deg)
 			pos.position.y = y
 			pos.position.z = z + radius*math.sin(actual_deg)
+			pitch = 0
+			yaw = 0
 			if(dir_sign<0):
 				roll = 2*math.pi
 			else:
 				roll = math.pi/2
-			pitch = 0
-			yaw = 0
 			if(dist>0):
 				if(dir_sign<0):
 					roll = (-math.pi/2) + max_sensor_angle*math.cos(actual_deg)
@@ -246,3 +249,9 @@ class robot_motion_lib():
 
 	def follow_circle_x(self, center_pos, radius=0.1, angle=2*math.pi, clockwise=0, num_points=10):
 		self.follow_cone_base_x(center_pos, radius, 0, angle, clockwise, num_points)
+
+	def rotate(self, rpy):
+		pos = self.group.get_current_pose().pose
+		pos = self.set_orientation_by_rpy(pos, rpy[0], rpy[1], rpy[2])
+		self.move_in_pos(pos)
+

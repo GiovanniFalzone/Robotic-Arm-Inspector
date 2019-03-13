@@ -90,6 +90,10 @@ def main():
 		print('moving to: ' + str(vect_pos))
 		motion_lib.move_in_xyz_rpy(vect_pos)
 
+	elif('rotate' in cmd):
+		vect = get_vector('Insert rpy as: ')
+		motion_lib.rotate(vect)
+
 	elif('pad' in cmd):
 		inspector.inspect_pads()
 
