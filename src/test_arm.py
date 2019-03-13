@@ -5,18 +5,47 @@ from train_inspector import *
 motion_lib = robot_motion_lib()
 inspector = train_inspector()
 
+
+train_description = {
+	'axis':{
+		'position':[0, 1.5, 2],
+		'lenght':2,
+		'pads':{
+			'num':2,
+			'coordinates': [[0.0, 1.2, 2.0], [0.0, 1.8, 2.0]],
+			'disk':{
+				'radius': 0.25,
+			},
+		}
+	}
+}
+
+def get_number(msg):
+	text = raw_input(msg)
+	return eval(text)
+
+def get_vector(msg):
+	text = raw_input(msg + ' ([x,y,z]):')
+	coords = text.split(']')[0].split('[')[1].split(',')
+	x = eval(coords[0])
+	y = eval(coords[1])
+	z = eval(coords[2])
+	return [x, y, z]
+
+def get_position():
+	return get_vector('Insert coordinates')
+
 def main():
 	msg = 'Press \n\
 	\t-> 1 to move in initial position \n\
 	\t-> 2 to move in max estension position \n\
 	\t-> 3 to move in checking position \n\
-	\t-> 4 follow circle y\n\
-	\t-> 5 follow cone y\n\
-	\t-> 6 follow line x\n\
-	\t-> 7 follow circle x\n\
-	\t-> 8 follow cone\n\
+	\t-> line to move following a cone base \n\
+	\t-> circle to move following a circle \n\
+	\t-> cone to move in checking position \n\
 	\t-> axis to check axis\n\
-	\t-> pad to check pads\n'
+	\t-> pad to check pads\n\
+	\t-> check to check the train\n'
 	cmd = raw_input(msg)
 	if('1' in cmd):
 		inspector.move_in_sleep_position()
@@ -24,28 +53,55 @@ def main():
 		inspector.move_in_waiting_position()
 	elif('3' in cmd):
 		inspector.move_in_checking_position()
-	elif('4' in cmd):
-		motion_lib.follow_circle_y([0, 2, 1.7], 0.1, math.pi, 1, 5)
-	elif('5' in cmd):
-		motion_lib.follow_cone_base_y([0, 2, 1.7], 0.2, 0.2, math.pi, 1, 5)
-	elif('6' in cmd):
-		motion_lib.follow_line([0.5, 1, 1], 0, 0.2, 0, 5)
-	elif('7' in cmd):
-		motion_lib.follow_circle_x([-0.5, 2, 2], 0.1, math.pi, 1, 5)
-	elif('8' in cmd):
-		motion_lib.follow_cone_base_x([-0.5, 2, 2], 0.2, 0.2, math.pi, 1, 5)
-	elif('axis' in cmd):
+	elif('circle' in cmd):
+		axis = raw_input('which axis?(x, y or z)') 
+		vect_pos = get_position()
+		print('Circle center: ' + str(vect_pos))
+		if('x' in axis):
+			motion_lib.follow_circle_x(vect_pos)
+		elif('y' in axis):
+			motion_lib.follow_circle_y(vect_pos)
+		elif('z' in axis):
+			motion_lib.follow_circle_z(vect_pos)
+
+	elif('cone' in cmd):
+		axis = raw_input('which axis?(x, y or z)') 
+		vect_pos = get_position()
+		print('Cone vertex: ' + str(vect_pos))
+		if('x' in axis):
+			motion_lib.follow_cone_base_x(vect_pos)
+		elif('y' in axis):
+			motion_lib.follow_cone_base_y(vect_pos)
+		elif('z' in axis):
+			motion_lib.follow_cone_base_z(vect_pos)
+
+	elif('line' in cmd):
+		vect_pos = get_position()
+		steps = get_number('Insert How many step:')
+		direction = get_vector('Insert Direction (Delta for each axis)')
+		motion_lib.follow_line(vect_pos, direction, steps)
+	elif('train_axis' in cmd):
 		inspector.inspect_axis()
-	elif('pad' in cmd):
+	elif('traind_pads' in cmd):
 		inspector.inspect_pads()
 	elif('pos' in cmd):
-		cmd = raw_input('insert cordinates:[x,y,z]')
-		coords = cmd.split(']')[0].split('[')[1].split(',')
-		x = eval(coords[0])
-		y = eval(coords[1])
-		z = eval(coords[2])
-		print('moving to: ' + str([x,y,z]))
-		motion_lib.move_in_xyz_rpy([x,y,z,0,0,0])
+		vect_pos = get_position()
+		vect_pos.extend([0,0,0]),
+		print('moving to: ' + str(vect_pos))
+		motion_lib.move_in_xyz_rpy(vect_pos)
+
+	elif('rotate' in cmd):
+		vect = get_vector('Insert rpy as: ')
+		motion_lib.rotate(vect)
+
+	elif('pad' in cmd):
+		inspector.inspect_pads()
+
+	elif('axis' in cmd):
+		inspector.inspect_axis()
+
+	elif('check' in cmd):
+		inspector.check_train(train_description)
 
 	else:
 		print('Wrong input \n')

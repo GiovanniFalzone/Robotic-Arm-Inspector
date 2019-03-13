@@ -9,6 +9,7 @@ import geometry_msgs.msg
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 from tf.transformations import quaternion_from_euler
+import numpy as np
 
 class robot_motion_lib():
 	def __init__(self):
@@ -55,6 +56,8 @@ class robot_motion_lib():
 		self.eef_link = eef_link
 		self.group_names = group_names
 		self.tolerance = 0.01
+		self.frame_pos = [0, 1.5, 1]
+		self.frame_angles = [math.pi/2, 0, math.pi/2]
 
 	def check_tolerance(self, goal, actual):
 		all_equal = True
@@ -121,59 +124,70 @@ class robot_motion_lib():
 		for pos in points:
 			self.move_in_pos(pos)
 
-	def follow_line(self, start_pos, step_x, step_y, step_z, max_step, dist=0.1, roll=math.pi/2, pitch=0, yaw=0):
+	def follow_line(self, start_pos, step, max_step, roll=math.pi/2, pitch=0, yaw=0):
 		x = start_pos[0]
 		y = start_pos[1]
 		z = start_pos[2]
+		roll = roll + self.frame_angles[0]
+		pitch = pitch + self.frame_angles[1]
+		yaw = yaw + self.frame_angles[2]
 		points = []
 		pos = geometry_msgs.msg.Pose()
 		for i in range(0, max_step):
-			pos.position.x = x + i*step_x
-			pos.position.y = y + i*step_y
-			pos.position.z = z + i*step_z - dist
+			pos.position.x = x + i*step[0]
+			pos.position.y = y + i*step[1] 
+			pos.position.z = z + i*step[2]
 			pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
 			points.append(copy.deepcopy(pos))
 		self.follow_points(points)
 
 	def follow_cone_base_z(self, vertex_pos, radius=0.1, dist=0.1, angle=2*math.pi, clockwise=0, num_points=10):
+		dir_sign = math.copysign(1, (vertex_pos[2] - self.frame_pos[2]))
 		x = vertex_pos[0]
 		y = vertex_pos[1]
-		z = vertex_pos[2] - dist
-		roll = math.pi/2
-		pitch = 0
-		yaw = 0
-		self.move_in_xyz_rpy([x, y, z, roll, pitch, yaw])
+		z = vertex_pos[2] - dist*dir_sign
 		direction = 1 - 2*clockwise
 		deg_step = angle/num_points
+		max_sensor_angle = math.atan(dist/radius)
 		points = []
 		pos = geometry_msgs.msg.Pose()
 		for i in range(0, num_points):
-			actual_deg = i*deg_step*direction
+			actual_deg = i*deg_step
 			pos.position.x = x + radius*math.cos(actual_deg)
-			pos.position.y = y
-			pos.position.z = z + radius*math.sin(actual_deg)
-			if(dist>0):
-				roll = math.pi/2 - math.atan(dist/radius)*math.cos(actual_deg)
-				pitch = 0 - math.atan(dist/radius)*math.sin(actual_deg)
-				yaw = 0
+			pos.position.y = y + radius*math.sin(actual_deg)
+			pos.position.z = z
+			roll = 0
+			yaw = 0
+			if(dir_sign<0):
+				pitch = -math.pi/2
 			else:
-				roll = math.pi/2
-				pitch = 0
-				yaw = 0
+				pitch = math.pi/2
+
+			if(dist>0):
+				if(dir_sign<0):
+					roll = 2*math.pi - actual_deg
+					pitch = math.pi - (math.pi + max_sensor_angle)
+					yaw = 0
+				else:
+					roll = 2*math.pi - actual_deg
+					pitch = math.pi + (math.pi + max_sensor_angle)
+					yaw = math.pi
+
 			pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
 			points.append(copy.deepcopy(pos))
 		self.follow_points(points)
 
+	def follow_circle_z(self, center_pos, radius=0.1, angle=2*math.pi, clockwise=0, num_points=10):
+		self.follow_cone_base_z(center_pos, radius, 0, angle, clockwise, num_points)
+
 	def follow_cone_base_y(self, vertex_pos, radius=0.1, dist=0.1, angle=2*math.pi, clockwise=0, num_points=10):
+		dir_sign = math.copysign(1, (vertex_pos[1] - self.frame_pos[1]))
 		x = vertex_pos[0]
-		y = vertex_pos[1] - dist
+		y = vertex_pos[1] - dist*dir_sign
 		z = vertex_pos[2]
-		roll = math.pi/2
-		pitch = 0
-		yaw = 0
-		self.move_in_xyz_rpy([x, y, z, roll, pitch, yaw])
 		direction = 1 - 2*clockwise
 		deg_step = angle/num_points
+		max_sensor_angle = math.atan(dist/radius)
 		points = []
 		pos = geometry_msgs.msg.Pose()
 		for i in range(0, num_points):
@@ -181,31 +195,35 @@ class robot_motion_lib():
 			pos.position.x = x + radius*math.cos(actual_deg)
 			pos.position.y = y
 			pos.position.z = z + radius*math.sin(actual_deg)
-			if(dist>0):
-				roll = math.pi/2 - math.atan(dist/radius)*math.cos(actual_deg)
-				pitch = 0 - math.atan(dist/radius)*math.sin(actual_deg)
-				yaw = 0
+			pitch = 0
+			yaw = 0
+			if(dir_sign<0):
+				roll = 2*math.pi
 			else:
 				roll = math.pi/2
-				pitch = 0
-				yaw = 0
+			if(dist>0):
+				if(dir_sign<0):
+					roll = (-math.pi/2) + max_sensor_angle*math.cos(actual_deg)
+					pitch = 0 - max_sensor_angle*math.sin(actual_deg)
+				else :
+					roll = (math.pi/2) - max_sensor_angle*math.cos(actual_deg)
+					pitch = 0 - max_sensor_angle*math.sin(actual_deg)
 			pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
 			points.append(copy.deepcopy(pos))
 		self.follow_points(points)
+
 
 	def follow_circle_y(self, center_pos, radius=0.1, angle=2*math.pi, clockwise=0, num_points=10):
 		self.follow_cone_base_y(center_pos, radius, 0, angle, clockwise, num_points)
 
 	def follow_cone_base_x(self, vertex_pos, radius=0.1, dist=0.1, angle=2*math.pi, clockwise=0, num_points=10):
-		x = vertex_pos[0] - dist
+		dir_sign = math.copysign(1, (vertex_pos[0] - self.frame_pos[0]))
+		x = vertex_pos[0] - dist*dir_sign
 		y = vertex_pos[1]
 		z = vertex_pos[2]
-		roll = 0
-		pitch = 0
-		yaw = 0
-		self.move_in_xyz_rpy([x, y, z, roll, pitch, yaw])
 		direction = 1 - 2*clockwise
 		deg_step = angle/num_points
+		max_sensor_angle = math.atan(dist/radius)
 		points = []
 		pos = geometry_msgs.msg.Pose()
 		for i in range(0, num_points):
@@ -213,17 +231,27 @@ class robot_motion_lib():
 			pos.position.x = x
 			pos.position.y = y + radius*math.cos(actual_deg)
 			pos.position.z = z + radius*math.sin(actual_deg)
+			roll = math.pi
+			if(dir_sign<0):
+				roll = 2*math.pi
+			pitch = 0
+			yaw = 0
 			if(dist>0):
-				roll = 0 - math.atan(dist/radius)*math.cos(actual_deg)
-				pitch = 0 - math.atan(dist/radius)*math.sin(actual_deg)
-				yaw = 0
-			else:
-				roll = 0
-				pitch = 0
-				yaw = 0
+				if(dir_sign<0):
+					roll = 0 - max_sensor_angle*math.cos(actual_deg)
+					pitch = 0 - max_sensor_angle*math.sin(actual_deg)
+				else :
+					roll = math.pi + max_sensor_angle*math.cos(actual_deg)
+					pitch = 0 - max_sensor_angle*math.sin(actual_deg)
 			pos = self.set_orientation_by_rpy(pos, roll, pitch, yaw)
 			points.append(copy.deepcopy(pos))
 		self.follow_points(points)
 
 	def follow_circle_x(self, center_pos, radius=0.1, angle=2*math.pi, clockwise=0, num_points=10):
 		self.follow_cone_base_x(center_pos, radius, 0, angle, clockwise, num_points)
+
+	def rotate(self, rpy):
+		pos = self.group.get_current_pose().pose
+		pos = self.set_orientation_by_rpy(pos, rpy[0], rpy[1], rpy[2])
+		self.move_in_pos(pos)
+
