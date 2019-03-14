@@ -7,11 +7,14 @@ add_compile_options(-std=c++11)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+set(PCL_DIR "/usr/lib/x86_64-linux-gnu/cmake/pcl/PCLConfig.cmake")
 find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
   roscpp
   rospy
 )
+
+find_package(PCL 1.3 REQUIRED COMPONENTS common io)
 
 # Depend on system install of Gazebo
 find_package(gazebo REQUIRED)
@@ -109,7 +112,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES robotic_arm_inspector
 #  CATKIN_DEPENDS roscpp rospy
-#  DEPENDS system_lib
+  DEPENDS system_lib roscpp gazebo_ros 
 )
 
 ###########
@@ -120,6 +123,10 @@ catkin_package(
 ## Your package locations should be listed before other locations
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
+
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -141,6 +148,9 @@ include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/robotic_arm_inspector_node.cpp)
+
+add_executable(example src/PointCloud_checker/example.cpp)
+target_link_libraries(example ${catkin_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -204,9 +214,3 @@ include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-catkin_package(
-  DEPENDS 
-    roscpp 
-    gazebo_ros 
-)
