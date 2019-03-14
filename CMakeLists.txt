@@ -14,7 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
 )
 
-find_package(PCL 1.3 REQUIRED COMPONENTS common io)
+find_package(PCL 1.3 REQUIRED)
 
 # Depend on system install of Gazebo
 find_package(gazebo REQUIRED)
@@ -121,11 +121,9 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-link_directories(${GAZEBO_LIBRARY_DIRS})
-include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
+link_directories(${GAZEBO_LIBRARY_DIRS} ${PCL_LIBRARY_DIRS})
+include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 
-include_directories(${PCL_INCLUDE_DIRS})
-link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
 ## Declare a C++ library
@@ -150,7 +148,13 @@ add_definitions(${PCL_DEFINITIONS})
 # add_executable(${PROJECT_NAME}_node src/robotic_arm_inspector_node.cpp)
 
 add_executable(example src/PointCloud_checker/example.cpp)
-target_link_libraries(example ${catkin_LIBRARIES})
+target_link_libraries(example ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable(example_2 src/PointCloud_checker/example_2.cpp)
+target_link_libraries(example_2 ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable(example_3 src/PointCloud_checker/example_3.cpp)
+target_link_libraries(example_3 ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

@@ -5,20 +5,33 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
-// ros::Publisher pub;
+#include <pcl/filters/voxel_grid.h>
+
+ros::Publisher pub;
 
 void 
-cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
+cloud_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
 {
-  // Create a container for the data.
+  // Container for original & filtered data
+  pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2; 
+  pcl::PCLPointCloud2ConstPtr cloudPtr(cloud);
+  pcl::PCLPointCloud2 cloud_filtered;
+
+  // Convert to PCL data type
+  pcl_conversions::toPCL(*cloud_msg, *cloud);
+
+  // Perform the actual filtering
+  pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
+  sor.setInputCloud (cloudPtr);
+  sor.setLeafSize (0.1, 0.1, 0.1);
+  sor.filter (cloud_filtered);
+
+  // Convert to ROS data type
   sensor_msgs::PointCloud2 output;
+  pcl_conversions::moveFromPCL(cloud_filtered, output);
 
-  // Do data processing here...
-	printf ("Cloud: width = %d, height = %d\n", input->width, input->height);
-  output = *input;
-
-  // Publish the data.
-//   pub.publish (output);
+  // Publish the data
+  pub.publish (output);
 }
 
 int
@@ -29,10 +42,10 @@ main (int argc, char** argv)
   ros::NodeHandle nh;
 
   // Create a ROS subscriber for the input point cloud
-  ros::Subscriber sub = nh.subscribe ("/camera1/depth/points", 1, cloud_cb);
+  ros::Subscriber sub = nh.subscribe<sensor_msgs::PointCloud2> ("/camera1/depth/points", 1, cloud_cb);
 
   // Create a ROS publisher for the output point cloud
-//   pub = nh.advertise<sensor_msgs::PointCloud2> ("output", 1);
+  pub = nh.advertise<sensor_msgs::PointCloud2> ("output", 1);
 
   // Spin
   ros::spin ();
