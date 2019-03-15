@@ -100,24 +100,37 @@
         </visual>
     </link>
     <link name="left_pad">
-        <pose>0.0 1.09 2.0 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <pose>0.0 0.99 2.0 0.0 1.5707963267948966 1.5707963267948966</pose>
         <collision name="collision">
             <geometry>
-                <cylinder>
-                    <radius>0.25</radius>
-                    <length>0.1</length>
-                </cylinder>
+                <polyline>
+                    <!-- <radius>0.25</radius> -->
+                    <point>0 -0.2</point>
+					<point>0.06 -0.19</point>
+                    <point>0.19 -0.06</point>
+					<point>0.2 0</point>
+					<point>0 0</point>
+                    <height>0.1</height>
+                </polyline>
             </geometry>
         </collision>
         <visual name="visual">
             <geometry>
-                <cylinder>
-                    <radius>0.25</radius>
-                    <length>0.1</length>
-                </cylinder>
+                <polyline>
+                    <!-- <radius>0.25</radius> -->
+                    <point>0 -0.2</point>
+					<point>0.06 -0.19</point>
+                    <point>0.19 -0.06</point>
+					<point>0.2 0</point>
+					<point>0 0</point>
+                    <height>0.1</height>
+                </polyline>
             </geometry>
             <material>
-                <ambient>1.0 0.0 0.0 1</ambient>
+                <script>
+                    <uri>file://media/materials/scripts/gazebo.material</uri>
+                    <name>Gazebo/Red</name>
+                </script>
             </material>
         </visual>
     </link>
@@ -125,21 +138,32 @@
         <pose>0.0 1.91 2.0 0.0 1.5707963267948966 1.5707963267948966</pose>
         <collision name="collision">
             <geometry>
-                <cylinder>
-                    <radius>0.25</radius>
-                    <length>0.1</length>
-                </cylinder>
+                <polyline>
+                    <point>0 -0.2</point>
+					<point>0.06 -0.19</point>
+                    <point>0.19 -0.06</point>
+					<point>0.2 0</point>
+					<point>0 0</point>
+                    <height>0.1</height>
+                </polyline>
             </geometry>
         </collision>
         <visual name="visual">
             <geometry>
-                <cylinder>
-                    <radius>0.25</radius>
-                    <length>0.1</length>
-                </cylinder>
+                <polyline>
+                    <point>0 -0.2</point>
+					<point>0.06 -0.19</point>
+                    <point>0.19 -0.06</point>
+					<point>0.2 0</point>
+					<point>0 0</point>
+                    <height>0.1</height>
+                </polyline>
             </geometry>
             <material>
-                <ambient>1.0 0.0 0.0 1</ambient>
+                <script>
+                    <uri>file://media/materials/scripts/gazebo.material</uri>
+                    <name>Gazebo/Red</name>
+                </script>
             </material>
         </visual>
     </link>

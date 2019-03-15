@@ -23,7 +23,10 @@
 					</box>
 				</geometry>
 				<material>
-        	<ambient>0.0 0.0 0.0 1</ambient>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Tertiary</name>
+          </script>
         </material>
 			</visual>
 		</link>  
@@ -42,9 +45,12 @@
 					<size>5.0 0.4 1.0</size>
 					</box>
 				</geometry>
-					<material>
-            <ambient>0.0 0.0 0.0 1</ambient>
-        	</material>
+				<material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Tertiary</name>
+          </script>
+        </material>
 			</visual>
 		</link>
     </model>
