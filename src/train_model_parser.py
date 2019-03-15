@@ -9,96 +9,145 @@ rotation_string = "0.0 " + str(pi/2) + " " + str(pi/2) +" "
 class train_model():
 	def __init__(self):
 		self.sdf_train = minidom.parse(MODELS_DIR + "train_model/model.sdf")
-		self.x = 0.0
-		self.y = 0.0
-		self.z = 2.0
 
+		# train_structure is a dictionary containing train description subdivided in axis, wheels, disks and pads
+		self.train_structure = self.init_dictionaries()
+
+	# sdf_file management
 	def get_sdf(self):
 		return self.sdf_train.documentElement.toxml()
 
-	def get_links(self):
-		return self.sdf_train.getElementsByTagName("link")
+	# returns a DOM node for the subelement with tag name "tagname"
+	def sdf_get_subelements(self, element, tagname):
+		return element.getElementsByTagName(tagname)
 
-	def get_attribute(self, element, attr):
+	def sdf_get_links(self):
+		return self.sdf_get_subelements(self.sdf_train, "link")
+
+	def sdf_get_pose(self, element):
+		return self.sdf_get_subelements(element, "pose")
+	
+	def sdf_get_length(self, element):
+		return self.sdf_get_subelements(element, "length")
+
+	def sdf_get_height(self, element):
+		return self.sdf_get_subelements(element, "height")
+
+	def sdf_get_radius(self, element):
+		return self.sdf_get_subelements(element, "radius")
+
+	# returns the value of the attribute "attr" for the element "element"
+	def sdf_get_attribute(self, element, attr):
 		return element.getAttribute(attr)
 
-	def get_value(self, element, tag):
-		return element.getElementsByTagName(tag)
+	# returns the value incapsulated by the given tag
+	def sdf_get_inner_value(self, element):
+		return element[0].firstChild.nodeValue
 
-	def get_pose(self, element):
-		return self.get_value(element, "pose")
-	
-	def get_length(self, element):
-		return self.get_value(element, "length")
-	
-	def get_inner_value(self, element):
-		for sub_el in element:
-			return sub_el.firstChild.nodeValue
-
-	def	check_attribute(self, element, attr, value):
-		return self.get_attribute(element, attr) == value
-
-	def check_name_attribute(self, element, value):
-		return self.check_attribute(element, "name", value)
-
-	def set_value(self, element, value):
+	def sdf_set_inner_value(self, element, value):
 		element.firstChild.nodeValue = value
+
+	# check if attribute "attr" has value "value"
+	def	sdf_check_attribute(self, element, attr, value):
+		return self.sdf_get_attribute(element, attr) == value
+
+	# check if attribute "name" is "value"
+	def sdf_check_name_attribute(self, element, value):
+		return self.sdf_check_attribute(element, "name", value)
+
+	# train dictionary management
+
+	# create a dictionary of the type:
+	#	{ "name" : "train", "axis" : {"pose": .., "width": .., "radius": ..}, "wheels":{....}...}
+	def init_dictionaries(self):
+		train_dict = { "name": "train" }
+
+		links = self.sdf_get_links()
+		axis_dict = { "name" : "axis"}
+		wheels_dict = { "name" : "wheels"}
+		disks_dict = { "name" : "disks" }
+		pads_dict = { "name" : "pads" }
+
+
+		for elem in links:
+			if self.sdf_check_name_attribute(elem, "axis"):
+				axis_dict["width"] = float(self.sdf_get_inner_value(self.sdf_get_length(elem)))
+				axis_dict["radius"] = float(self.sdf_get_inner_value(self.sdf_get_radius(elem)))
+				axis_dict["pose"] = str(self.sdf_get_inner_value(self.sdf_get_pose(elem)))
+			elif self.sdf_check_name_attribute(elem, "left_wheel"):
+				wheels_dict["width"] = float(self.sdf_get_inner_value(self.sdf_get_length(elem)))
+				wheels_dict["radius"] = float(self.sdf_get_inner_value(self.sdf_get_radius(elem)))
+				lw_pose = str(self.sdf_get_inner_value(self.sdf_get_pose(elem)))
+			elif self.sdf_check_name_attribute(elem, "right_wheel"):
+				rw_pose = str(self.sdf_get_inner_value(self.sdf_get_pose(elem)))
+			elif self.sdf_check_name_attribute(elem, "left_disk"):
+				disks_dict["width"] = float(self.sdf_get_inner_value(self.sdf_get_length(elem)))
+				disks_dict["radius"] = float(self.sdf_get_inner_value(self.sdf_get_radius(elem)))
+				ld_pose = str(self.sdf_get_inner_value(self.sdf_get_pose(elem)))
+			elif self.sdf_check_name_attribute(elem, "right_disk"):
+				rd_pose = str(self.sdf_get_inner_value(self.sdf_get_pose(elem)))
+			elif self.sdf_check_name_attribute(elem, "left_pad"):
+				lp_width = {"left": float(self.sdf_get_inner_value(self.sdf_get_height(elem)))}
+				pads_dict["width"] = lp_width
+				#pads_dict["radius"] = float(self.sdf_get_inner_value(self.sdf_get_radius(elem)))
+				lp_pose = str(self.sdf_get_inner_value(self.sdf_get_pose(elem)))
+			elif self.sdf_check_name_attribute(elem, "right_pad"):
+				pads_dict["width"]["right"] = float(self.sdf_get_inner_value(self.sdf_get_height(elem)))
+				rp_pose = str(self.sdf_get_inner_value(self.sdf_get_pose(elem)))
+
+		wheels_dict["pose"] = [lw_pose, rw_pose]
+		disks_dict["pose"] = [ld_pose, rd_pose]
+		pads_dict["pose"] = [lp_pose, rp_pose]
+		
+		train_dict["axis"] = axis_dict
+		train_dict["wheels"] = wheels_dict
+		train_dict["disks"] = disks_dict
+		train_dict["pads"] = pads_dict
+
+		return train_dict
 	
-	def find_pad_position(self, dir, pw):
-		y = 0
-		links = self.get_links()
-		axis_width = 0
-		disk_width = 0
+	def train_struct_get_dict(self, dictName):
+		return self.train_structure.get(dictName)
 
-		for elem in links:
-			if self.check_name_attribute(elem, "axis"):
-				axis_width = float(self.get_inner_value(self.get_length(elem)))
+	def train_struct_get_pose(self, dictName):
+		return self.train_struct_get_dict(dictName).get("pose")
 
-			elif self.check_name_attribute(elem, dir+"_disk"):
-				disk_width = float(self.get_inner_value(self.get_length(elem)))
-				
-		if "left" in dir:
-			y = axis_width / 3 + disk_width / 2 + pw / 2
-		elif "right" in dir:
-			y = 2*axis_width/3 - disk_width / 2 - pw / 2
+	def train_struct_get_width(self, dictName):
+		return self.train_struct_get_dict(dictName).get("width")
+
+	def train_struct_get_radius(self, dictName):
+		return self.train_struct_get_dict(dictName).get("radius")
+
+	def train_struct_get_coordinates(self, dictName):
+		pose = self.train_struct_get_pose(dictName)
+
+		if("axis" in dictName):
+			pose_arr = pose.split(" ")
+			return [pose_arr[0], pose_arr[1], pose_arr[2]]
 		else:
-			print "wrong direction given"
+			lpose_arr = pose[0].split(" ")
+			rpose_arr = pose[1].split(" ")
 
-		return [self.x, y, self.z]
+		return [[lpose_arr[0], lpose_arr[1], lpose_arr[2]],[rpose_arr[0], rpose_arr[1], rpose_arr[2]]]
+	
+	def train_struct_set_pose(self, dictName, pose):
+		self.train_struct_get_dict(dictName)["pose"] = pose
 
-	def get_pad_position(self, dir, pw):
-		return self.find_pad_position(dir, pw)
+	def train_struct_set_left_pose(self, dictName, pose):
+		self.train_struct_get_dict(dictName)["pose"][0] = pose
+	
+	def train_struct_set_right_pose(self, dictName, pose):
+		self.train_struct_get_dict(dictName)["pose"][1] = pose
 
-	def set_pads_width(self, left_pad_width, right_pad_width):
-		links = self.get_links()
+	def train_struct_set_width(self, dictName, dir, width):
+		if "pads" in dictName:
+			self.train_struct_get_dict(dictName)["width"][dir] = width
+		else:
+			self.train_struct_get_dict(dictName)["width"] = width
 
-		#iterate on links
-		for elem in links:
-			# check if name attribute is "left_pad" or "right_pad"
-			if self.check_name_attribute(elem, "left_pad"):
-				# get y coordinates for left pad
-				p_coord = self.find_pad_position("left", left_pad_width)
-				pad_pose_value =  ""+ str(p_coord[0]) + " " + str(p_coord[1]) + " " + str(p_coord[2]) + " " + rotation_string + ""
-				pad_pose = self.get_pose(elem)
-				
-				# set left pad position
-				self.set_value(pad_pose[0], pad_pose_value)
-			
-				pad_width = self.get_length(elem)
-				#set left pad width w.r.t. its position
-				for pad_l in pad_width:
-					self.set_value(pad_l, left_pad_width)
-			
-			elif self.check_name_attribute(elem, "right_pad"):
-				p_coord = self.find_pad_position("right", right_pad_width)
-				pad_pose_value =  ""+ str(p_coord[0]) + " " + str(p_coord[1]) + " " + str(p_coord[2]) + " " + rotation_string + ""
-				pad_pose = self.get_pose(elem)
+	def train_struct_set_radius(self, dictName, radius):
+		self.train_struct_get_dict(dictName)["radius"] = radius
 
-				self.set_value(pad_pose[0], pad_pose_value)
-
-				pad_width = self.get_length(elem)
-				for pad_l in pad_width:
-					self.set_value(pad_l, right_pad_width)
-				
-			
-
+	# pad management
+	def xyz_to_pose_string(self, x, y, z):
+		return ""+ str(x) + " " + str(y) + " " + str(z) + " " + rotation_string + ""

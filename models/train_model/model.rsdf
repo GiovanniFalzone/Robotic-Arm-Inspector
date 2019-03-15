@@ -48,10 +48,10 @@
     right_disk_arr = [x0, rd_y0, z0, roll, pitch, yaw]
 
     #pads variables
-    lp_y0 = axis_width/3 + disk_width/2 + pad_width/2
+    lp_y0 = axis_width/3 + disk_width/2
     left_pad_arr = [x0, lp_y0, z0, roll, pitch, yaw]
 
-    rp_y0 = axis_width*2/3 - disk_width/2 - pad_width/2
+    rp_y0 = axis_width*2/3 - disk_width/2 - pad_width
     right_pad_arr = [x0, rp_y0, z0, roll, pitch, yaw]
 
     #colors
@@ -162,21 +162,32 @@
         <pose><%= left_pad_arr.join(" ") %></pose>
         <collision name="collision">
             <geometry>
-                <cylinder>
-                    <radius><%= pad_radius %></radius>
-                    <length><%= pad_width %></length>
-                </cylinder>
+                <polyline>
+                    <point>0 -0.2</point>
+					<point>0.06 -0.19</point>
+                    <point>0.19 -0.06</point>
+					<point>0.2 0</point>
+					<point>0 0</point>
+                    <height><%= pad_width %></height>
+                </polyline>
             </geometry>
         </collision>
         <visual name="visual">
             <geometry>
-                <cylinder>
-                    <radius><%= pad_radius %></radius>
-                    <length><%= pad_width %></length>
-                </cylinder>
+                <polyline>
+                    <point>0 -0.2</point>
+					<point>0.06 -0.19</point>
+                    <point>0.19 -0.06</point>
+					<point>0.2 0</point>
+					<point>0 0</point>
+                    <height><%= pad_width %></height>
+                </polyline>
             </geometry>
             <material>
-                <ambient><%= red.join(" ") %></ambient>
+                <script>
+                    <uri>file://media/materials/scripts/gazebo.material</uri>
+                    <name>Gazebo/Red</name>
+                </script>
             </material>
         </visual>
     </link>
@@ -184,21 +195,32 @@
         <pose><%= right_pad_arr.join(" ") %></pose>
         <collision name="collision">
             <geometry>
-                <cylinder>
-                    <radius><%= pad_radius %></radius>
-                    <length><%= pad_width %></length>
-                </cylinder>
+                <polyline>
+                    <point>0 -0.2</point>
+					<point>0.06 -0.19</point>
+                    <point>0.19 -0.06</point>
+					<point>0.2 0</point>
+					<point>0 0</point>
+                    <height><%= pad_width %></height>
+                </polyline>
             </geometry>
         </collision>
         <visual name="visual">
             <geometry>
-                <cylinder>
-                    <radius><%= pad_radius %></radius>
-                    <length><%= pad_width %></length>
-                </cylinder>
+                <polyline>
+                    <point>0 -0.2</point>
+					<point>0.06 -0.19</point>
+                    <point>0.19 -0.06</point>
+					<point>0.2 0</point>
+					<point>0 0</point>
+                    <height><%= pad_width %></height>
+                </polyline>
             </geometry>
             <material>
-                <ambient><%= red.join(" ") %></ambient>
+                <script>
+                    <uri>file://media/materials/scripts/gazebo.material</uri>
+                    <name>Gazebo/Red</name>
+                </script>
             </material>
         </visual>
     </link>
