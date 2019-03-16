@@ -19,7 +19,10 @@ z0 = 2.0
 
 # a pad is considered "good" or "bad" w.r.t. its width
 good_pad_width = 0.1		
-bad_pad_width = 0.05
+bad_pad_width = 0.02
+high_treshold = (good_pad_width - bad_pad_width)* 2 / 3
+mid_treshold = (good_pad_width - bad_pad_width) / 2
+low_treshold = (good_pad_width - bad_pad_width) / 3
 
 # given a pad width we need to find its center related to disks positions
 def find_pad_position(dir, pw):
@@ -59,6 +62,14 @@ def set_pads_width(left_pad_width, right_pad_width):
 			for width in pad_width:
 				train_model.sdf_set_inner_value(width, left_pad_width)
 
+			if(left_pad_width > low_treshold):
+				if(left_pad_width > high_treshold):
+					train_model.sdf_set_pad_color(elem, "Green")
+				else:
+					train_model.sdf_set_pad_color(elem, "Yellow")
+			else:
+				train_model.sdf_set_pad_color(elem, "Red")
+
 			# modify "train_structure" dictionary
 			train_model.train_struct_set_width("pads", "left", left_pad_width)
 			train_model.train_struct_set_left_pose("pads", pad_pose_value)
@@ -73,6 +84,14 @@ def set_pads_width(left_pad_width, right_pad_width):
 			pad_width = train_model.sdf_get_height(elem)
 			for width in pad_width:
 				train_model.sdf_set_inner_value(width, right_pad_width)
+
+			if(right_pad_width > low_treshold):
+				if(right_pad_width > high_treshold):
+					train_model.sdf_set_pad_color(elem, "Green")
+				else:
+					train_model.sdf_set_pad_color(elem, "Yellow")
+			else:
+				train_model.sdf_set_pad_color(elem, "Red")
 
 			train_model.train_struct_set_width("pads", "right", right_pad_width)
 			train_model.train_struct_set_right_pose("pads", pad_pose_value)
@@ -124,7 +143,7 @@ def spawn_notify(pub):
 	if not rospy.is_shutdown():
 		msg = create_message("check")
 		json_msg = json.dumps(msg)
-		print json_msg
+		#print json_msg
 		pub.publish(json_msg)
 
 if __name__ == '__main__':
@@ -143,17 +162,18 @@ if __name__ == '__main__':
 
 	pub = rospy.Publisher('spawn_channel', String, queue_size=10)
 	
-	out0 = "Delete the train model"
-	out1 = "Spawn a train model with 'good' pads"
-	out2 = "Spawn a train model with 'bad' pads"
-	out3 = "Spawn a train model with 'random' pads"
-	out4 = "EXIT"
-
 	i = 0
 
 	while True:
-		type=input("What do you want to do? \n\t0\t>>"+out0+"\n\t1\t>>"+out1+"\n\t2\t>>"+out2+"\n\t3\t>>"+out3+"\n\tother\t>>"+out4+"\n")
-		if type == 1:
+		out_msg = 'Press \n\
+\t-> 1 to spawn a train with "good" pads \n\
+\t-> 2 to spawn a train with "bad" pads \n\
+\t-> 3 to spawn a train with random pads \n\
+\t-> 0 to delete the spawned train \n\
+\t-> p to print train specs \n\
+\t-> other to exit \n'
+		in_cmd = raw_input(out_msg)
+		if '1' in in_cmd:
 			i+=1
 			# Spawn train with good pads
 			print "Spawning train with good pads"
@@ -161,14 +181,14 @@ if __name__ == '__main__':
 										0.0, 0.0, 0.0,		# train initial position
 										good_pad_width, good_pad_width)  		# pads length (status)
 			spawn_srv.call(req)
-		elif type == 2:
+		elif '2' in in_cmd:
 			i+=1
 			print "Spawning train with bad pads"
 			req = create_train_request("train_model_"+str(i), 
 										0.0, 0.0, 0.0,
 										bad_pad_width, bad_pad_width) 
 			spawn_srv.call(req)
-		elif type == 3:
+		elif '3' in in_cmd:
 			i+=1
 			print "Spawning train with random pads width"
 			lpw = random.uniform(bad_pad_width, good_pad_width)
@@ -179,10 +199,12 @@ if __name__ == '__main__':
 										0.0, 0.0, 0.0,
 										lpw, rpw) 
 			spawn_srv.call(req)
-		elif type == 0:
+		elif '0' in in_cmd:
 			print "Deleting train model"
 			delete_srv("train_model_"+str(i))
 			continue
+		elif 'p' in in_cmd:
+			train_model.train_struct_print()
 		else:	
 			break
 		
