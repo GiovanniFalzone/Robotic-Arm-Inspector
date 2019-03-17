@@ -47,6 +47,10 @@ class train_model():
 	def sdf_set_inner_value(self, element, value):
 		element.firstChild.nodeValue = value
 
+	def sdf_set_pad_color(self, element, color):
+		material_name = self.sdf_get_subelements(element, "name")
+		self.sdf_set_inner_value(material_name[0], "Gazebo/"+color)
+
 	# check if attribute "attr" has value "value"
 	def	sdf_check_attribute(self, element, attr, value):
 		return self.sdf_get_attribute(element, attr) == value
@@ -151,3 +155,13 @@ class train_model():
 	# pad management
 	def xyz_to_pose_string(self, x, y, z):
 		return ""+ str(x) + " " + str(y) + " " + str(z) + " " + rotation_string + ""
+
+	def train_struct_print(self):
+		print 'train structure:'
+		for key in self.train_structure:
+			if 'name' not in key:
+				print key+":{"
+				for subkey in self.train_structure[key]:
+					if 'name' not in subkey:
+						print "\t"+subkey+":"+str(self.train_structure[key][subkey])
+				print "}"
