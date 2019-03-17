@@ -40,7 +40,7 @@ class train_inspector():
 		self.last_Kinect_PC2 = copy.deepcopy(data)
 
 	def init_PC_sender_receiver(self):
-		self.pub = rospy.Publisher('planes_check', planes_msg, queue_size=10)
+		self.pub = rospy.Publisher('/robotic_arm_inspector/pad_check', planes_msg, queue_size=10)
 		rospy.Subscriber('/camera1/depth/points', PointCloud2, self.callback)
 
 	def send_to_PC_checker(self, pc1, pos1, pc2, pos2):
