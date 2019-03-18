@@ -73,7 +73,7 @@ class train_inspector():
 		pos = self.arm_description.get('checking_position')
 		self.motion_lib.move_in_xyz_rpy(pos)
 
-	def inspect_pads(self):
+	def inspect_pads_cone(self):
 		pads_pos = self.train_description.get('axis').get('pads').get('coordinates')
 		dist = self.train_description.get('axis').get('pads').get('disk').get('radius') + 0.4
 		print(pads_pos)
@@ -87,6 +87,32 @@ class train_inspector():
 			pos2 = self.motion_lib.get_pos_xyz_rpy()
 			self.send_to_PC_checker(pc1, pos1, pc2, pos2)
 		
+	def inspect_pads(self):
+		pc1 = copy.deepcopy(self.last_Kinect_PC2)
+		pos1 = self.motion_lib.get_pos_xyz_rpy()
+
+		vect_pos = [0.00005, 1.5, 1.75, -math.pi/2, 0, 0]
+		self.motion_lib.move_in_xyz_rpy(vect_pos)
+
+		while(pc1.header.stamp == self.last_Kinect_PC2.header.stamp):
+			pass
+		pc2 = copy.deepcopy(self.last_Kinect_PC2)
+		pos2 = self.motion_lib.get_pos_xyz_rpy()
+		self.send_to_PC_checker(pc1, pos1, pc2, pos2)
+
+		pc1 = copy.deepcopy(self.last_Kinect_PC2)
+		pos1 = self.motion_lib.get_pos_xyz_rpy()
+
+		vect_pos = [0.00005, 1.5, 1.75, 0, 0, 0]
+		self.motion_lib.move_in_xyz_rpy(vect_pos)
+
+		while(pc1.header.stamp == self.last_Kinect_PC2.header.stamp):
+			pass
+		pc2 = copy.deepcopy(self.last_Kinect_PC2)
+		pos2 = self.motion_lib.get_pos_xyz_rpy()
+		self.send_to_PC_checker(pc1, pos1, pc2, pos2)
+
+
 	def inspect_axis(self):
 		axis_center_pos = deepcopy(self.train_description.get('axis').get('position'))
 		axis_lenght = self.train_description.get('axis').get('lenght')
