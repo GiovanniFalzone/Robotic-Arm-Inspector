@@ -52,10 +52,8 @@ class train_inspector():
 			'checking_position':[0, 1.5, 1.5, math.pi/2, 0, 0]
 		}
 
-<<<<<<< HEAD
 	def set_train_description(self, train_desc):
 		self.train_description = train_desc
-=======
 	def callback(self, data):
 		# print('data received')
 		self.last_Kinect_PC2 = copy.deepcopy(data)
@@ -81,7 +79,6 @@ class train_inspector():
 
 		rospy.loginfo(msg.info)
 		self.pub.publish(msg)
->>>>>>> PointCloud_Check_Node
 
 	def move_in_sleep_position(self):
 		joints_vect = self.arm_description.get('relax_joints_angles')
