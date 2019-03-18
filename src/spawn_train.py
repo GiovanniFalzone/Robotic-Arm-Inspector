@@ -26,6 +26,8 @@ low_treshold = (good_pad_width - bad_pad_width) / 3
 
 # given a pad width we need to find its center related to disks positions
 def find_pad_position(dir, pw):
+	"""Calculates pad position for gazebo, with respect to its width
+	and the disks position as: disk_center +- half_disk +- pad width"""
 	y = 0
 
 	axis_width = train_model.train_struct_get_width("axis")
@@ -41,6 +43,7 @@ def find_pad_position(dir, pw):
 
 # manage pads width in sdf and to spawn the train
 def set_pads_width(left_pad_width, right_pad_width):
+	"""Modify pads width in train_structure and in sdf model, to show on gazebo"""
 	links = train_model.sdf_get_links()
 
 	train_model.train_struct_set_pose("pads", [left_pad_width, right_pad_width])
@@ -169,6 +172,7 @@ if __name__ == '__main__':
 \t-> 1 to spawn a train with "good" pads \n\
 \t-> 2 to spawn a train with "bad" pads \n\
 \t-> 3 to spawn a train with random pads \n\
+\t-> 4 to spawn a train with chosen pads width \n\
 \t-> 0 to delete the spawned train \n\
 \t-> p to print train specs \n\
 \t-> other to exit \n'
@@ -199,6 +203,18 @@ if __name__ == '__main__':
 										0.0, 0.0, 0.0,
 										lpw, rpw) 
 			spawn_srv.call(req)
+		elif '4' in in_cmd:
+			out_msg = 'Choose pads width for left pad\n'
+			lpw = raw_input(out_msg)
+			out_msg = 'Choose pads width for right pad\n'
+			rpw = raw_input(out_msg)
+			print "Spawning train with chosen pads width:"
+			print "-left pad width "+str(lpw)
+			print "-right pad width "+str(rpw)
+			req = create_train_request("train_model_"+str(i),
+										0.0, 0.0, 0.0,
+										lpw, rpw)
+			spawn_srv.call(req)		
 		elif '0' in in_cmd:
 			print "Deleting train model"
 			delete_srv("train_model_"+str(i))
