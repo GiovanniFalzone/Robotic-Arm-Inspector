@@ -7,11 +7,16 @@ add_compile_options(-std=c++11)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+set(PCL_DIR "/usr/lib/x86_64-linux-gnu/cmake/pcl/PCLConfig.cmake")
 find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
   roscpp
   rospy
+  std_msgs
+  message_generation
 )
+
+find_package(PCL 1.3 REQUIRED)
 
 # Depend on system install of Gazebo
 find_package(gazebo REQUIRED)
@@ -50,11 +55,10 @@ find_package(gazebo REQUIRED)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+ add_message_files(
+   FILES
+   planes_msg.msg
+ )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -71,10 +75,11 @@ find_package(gazebo REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs  # Or other packages containing msgs
+   sensor_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -108,8 +113,8 @@ find_package(gazebo REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES robotic_arm_inspector
-#  CATKIN_DEPENDS roscpp rospy
-#  DEPENDS system_lib
+  CATKIN_DEPENDS roscpp rospy message_runtime
+  DEPENDS system_lib roscpp gazebo_ros 
 )
 
 ###########
@@ -118,8 +123,10 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-link_directories(${GAZEBO_LIBRARY_DIRS})
-include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
+link_directories(${GAZEBO_LIBRARY_DIRS} ${PCL_LIBRARY_DIRS})
+include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
+
+add_definitions(${PCL_DEFINITIONS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -141,6 +148,19 @@ include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/robotic_arm_inspector_node.cpp)
+
+add_executable(example src/PointCloud_checker/example.cpp)
+target_link_libraries(example ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable(example_2 src/PointCloud_checker/example_2.cpp)
+target_link_libraries(example_2 ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable(example_3 src/PointCloud_checker/example_3.cpp)
+target_link_libraries(example_3 ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable(pad_checker_node src/PointCloud_checker/pad_checker_node.cpp)
+target_link_libraries(pad_checker_node ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -204,9 +224,3 @@ include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${GAZEBO_INCLUDE
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-catkin_package(
-  DEPENDS 
-    roscpp 
-    gazebo_ros 
-)

@@ -9,6 +9,7 @@ import geometry_msgs.msg
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 from tf.transformations import quaternion_from_euler
+from tf.transformations import euler_from_quaternion
 import numpy as np
 
 class robot_motion_lib():
@@ -90,6 +91,19 @@ class robot_motion_lib():
 		pos.position.y = vect[1]
 		pos.position.z = vect[2]
 		return pos
+
+	def get_pos_xyz_rpy(self):
+		pose = self.group.get_current_pose().pose
+		x = pose.position.x
+		y = pose.position.y
+		z = pose.position.z
+		quaternion = (
+    		pose.orientation.x,
+		    pose.orientation.y,
+			pose.orientation.z,
+			pose.orientation.w)
+		euler = euler_from_quaternion(quaternion)
+		return [x, y, z, euler[0], euler[1], euler[2]]
 
 	def move_in_pos(self, pos):
 		print(pos)
