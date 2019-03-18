@@ -6,19 +6,36 @@ from copy import deepcopy
 class train_inspector():
 	def __init__(self):
 		self.motion_lib = robot_motion_lib()
-		self.train_description = {
-			'axis':{
-				'position':[0, 1.5, 2],
-				'lenght':2,
-				'pads':{
-					'num':2,
-					'coordinates': [[0.0, 1.2, 2.0], [0.0, 1.8, 2.0]],
-					'disk':{
-						'radius': 0.25,
-					},
-				}
+		self.train_description = { 
+			'name' : 'train_model_name',
+			'axis' : {
+				'pose' : 'x y z roll pitch yaw',
+				'coordinates' : [0.0, 0.0, 0.0],
+				'radius' : 'radius',
+				'width': 'width',
+			},
+			'wheels' : {
+				'name' : 'wheels',
+				'pose' : { 'left': 'lx ly lz lroll lpitch lyaw', 'right' : 'rx ry rz rroll rpitch ryaw'},
+				'coordinates' : {'left' : [0.0, 0.0, 0.0], 'right': [0.0, 0.0, 0.0]},
+				'radius' : 'wheels radius',
+				'width': 'wheels width',
+			},
+			'disks' : {
+				'name' : 'disks',
+				'pose' : { 'left': 'lx ly lz lroll lpitch lyaw', 'right' : 'rx ry rz rroll rpitch ryaw'},
+				'coordinates' : {'left' : [0.0, 0.0, 0.0], 'right': [0.0, 0.0, 0.0]},
+				'radius' : 'disks radius',
+				'width': 'disks width',
+			},
+			'pads' : {
+				'name' : 'pads',
+				'pose' : { 'left': 'lx ly lz lroll lpitch lyaw', 'right' : 'rx ry rz rroll rpitch ryaw'},
+				'coordinates' : {'left' : [0.0, 0.0, 0.0], 'right': [0.0, 0.0, 0.0]},
+				'width': {'left': 'left width', 'right': 'right_width'},
 			}
 		}
+		
 		self.arm_description = {
 			'name':'UR5',
 			'num_joints':6,
@@ -26,6 +43,9 @@ class train_inspector():
 			'waiting_joints_angles':[0, -math.pi/4, 0, -math.pi/2, 0, -math.pi/4],
 			'checking_position':[0, 1.5, 1.5, math.pi/2, 0, 0]
 		}
+
+	def set_train_description(self, train_desc):
+		self.train_description = train_desc
 
 	def move_in_sleep_position(self):
 		joints_vect = self.arm_description.get('relax_joints_angles')
@@ -40,16 +60,16 @@ class train_inspector():
 		self.motion_lib.move_in_xyz_rpy(pos)
 
 	def inspect_pads(self):
-		pads_pos = self.train_description.get('axis').get('pads').get('coordinates')
-		dist = self.train_description.get('axis').get('pads').get('disk').get('radius') + 0.4
+		pads_pos = self.train_description.get('pads').get('coordinates')
+		dist = self.train_description.get('disks').get('radius') + 0.4
 		print(pads_pos)
 		for pos in pads_pos:
-			self.motion_lib.follow_cone_base_z(pos, 0.1, dist, 2*math.pi, 1, 5)
+			self.motion_lib.follow_cone_base_z(pads_pos.get(pos), 0.1, dist, 2*math.pi, 1, 5)
 		
 	def inspect_axis(self):
-		axis_center_pos = deepcopy(self.train_description.get('axis').get('position'))
-		axis_lenght = self.train_description.get('axis').get('lenght')
-		dist = self.train_description.get('axis').get('pads').get('disk').get('radius') + 0.25
+		axis_center_pos = deepcopy(self.train_description.get('axis').get('coordinates'))
+		axis_lenght = self.train_description.get('axis').get('width')
+		dist = self.train_description.get('disks').get('radius') + 0.25
 		print axis_center_pos
 		start_pos = axis_center_pos
 		start_pos[1] -= axis_lenght/2
@@ -61,7 +81,6 @@ class train_inspector():
 		self.motion_lib.follow_line(start_pos, direction, n_step, math.pi/2, math.pi/2, 0)
 
 	def check_train(self, train_desc):
-		self.train_description = train_desc
 		self.move_in_sleep_position()
 		self.move_in_waiting_position()
 		self.inspect_axis()
