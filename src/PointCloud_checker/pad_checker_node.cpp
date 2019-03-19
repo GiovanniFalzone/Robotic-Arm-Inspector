@@ -39,17 +39,18 @@ plane_struct get_plane_struct(pcl::PointCloud<pcl::PointXYZ> cloud){
 	seg.setInputCloud (cloud.makeShared ());
 	seg.segment (inliers, coefficients); 
 
+  plane_struct ret;
   if (inliers.indices.size () == 0) {
     PCL_ERROR ("Could not estimate a planar model for the given dataset.");
+    return ret;
+  } else {
+    // Publish the model coefficients
+    pcl_msgs::ModelCoefficients ros_coefficients;
+    pcl_conversions::fromPCL(coefficients, ros_coefficients);
+    ROS_INFO("[%f,%f,%f,%f]", ros_coefficients.values[0],ros_coefficients.values[1],ros_coefficients.values[2],ros_coefficients.values[3]);
+
+    ret = {ros_coefficients, inliers};
   }
-
-	// Publish the model coefficients
-	pcl_msgs::ModelCoefficients ros_coefficients;
-	pcl_conversions::fromPCL(coefficients, ros_coefficients);
-	pub.publish (ros_coefficients);
-  ROS_INFO("[%f,%f,%f,%f]", ros_coefficients.values[0],ros_coefficients.values[1],ros_coefficients.values[2],ros_coefficients.values[3]);
-
-  plane_struct ret = {ros_coefficients, inliers};
   return ret;
 }
 
@@ -65,7 +66,7 @@ float compute_point_plane_distance(pcl_msgs::ModelCoefficients coefficients, flo
   // ROS_INFO("plane [%f,%f,%f,%f]", A, B, C, D);
   // ROS_INFO("point [%f,%f,%f]", x, y, z);
 
-  float num = fabs(A*x + B*y + C*z + D);
+  float num = fabs(A*x + B*y + C*z - D);
   float den = sqrt(pow(A,2) + pow(B,2) + pow(C,2));
   float dist = num/den;
 
@@ -110,7 +111,19 @@ pcl::PointCloud<pcl::PointXYZ> filter_cloud(pcl::PointCloud<pcl::PointXYZ> cloud
   voxel_grid.setInputCloud (cloud);
   voxel_grid.setLeafSize (0.1, 0.1, 0.1);
   voxel_grid.filter(*cloud);
+
   return *cloud;
+}
+
+void publish_pc(pcl::PointCloud<pcl::PointXYZ> cloud){
+  // convert to pointCloud2
+  pcl::PCLPointCloud2 point_cloud2;
+  pcl::toPCLPointCloud2(cloud, point_cloud2);
+  // Convert to ROS data type
+  sensor_msgs::PointCloud2 output;
+  pcl_conversions::moveFromPCL(point_cloud2, output);
+  // Publish the data
+  pub.publish (output);
 }
 
 // il tipo del messaggio dipende dal topic che è stato creato su quel tipo di mesaggio
@@ -123,6 +136,7 @@ void cloud_analyzer (const robotic_arm_inspector::planes_msgConstPtr& input) {
 
   // ROS_INFO("PC1 points: %lu", pc1.points.size());
   pc1 = filter_cloud(pc1);
+  publish_pc(pc1);
   // ROS_INFO("PC1 points: %lu", pc1.points.size());
 
   // ROS_INFO("PC2 points: %lu", pc2.points.size());
@@ -141,8 +155,8 @@ int main (int argc, char** argv) {
 	// Create a ROS subscriber for the input point cloud
 	ros::Subscriber sub = nh.subscribe ("/robotic_arm_inspector/pad_check", 1, cloud_analyzer);
 
-	// Create a ROS publisher for the output model coefficients
-	pub = nh.advertise<pcl_msgs::ModelCoefficients> ("output", 1);
+	// Create a ROS publisher for the filtered cloud
+  pub = nh.advertise<sensor_msgs::PointCloud2> ("output", 1);
 
 	// Spin
 	ros::spin ();
