@@ -40,9 +40,9 @@ def find_pad_position(dir, pw):
 	disk_width = train_model.train_struct_get_width('disks')
 
 	if "left" in dir:
-		y = axis_width / 3 + disk_width / 2
+		y = axis_width / 6 + disk_width / 2
 	elif "right" in dir:
-		y = 2*axis_width/3 - disk_width / 2 - pw	
+		y = 2*axis_width / 3 - disk_width / 2 - pw	
 	
 	pose_str = train_model.xyz_to_pose_string(x0, y, z0)
 	return pose_str
@@ -193,6 +193,13 @@ def spawn_train(spawn_srv, delete_srv):
 		elif 'p' in in_cmd:
 			train_model.train_struct_print()
 		else:
+			rospy.loginfo("Inspecting the environment")
+			inspector.move_in_waiting_position()
+			inspector.move_in_sleep_position()
+			# vect_pos = [0.0, 1.5, 0.0]
+			# vect_pos.extend([0,0,0]),
+			# motion_lib.move_in_xyz_rpy(vect_pos)
+			rospy.loginfo("Success")
 			return 1
 
 def get_number(msg):

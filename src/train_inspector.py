@@ -103,7 +103,7 @@ class train_inspector():
 		pc1 = copy.deepcopy(self.last_Kinect_PC2)
 		pos1 = self.motion_lib.get_pos_xyz_rpy()
 
-		vect_pos = [0.00005, 1.5, 1.75, -math.pi/2, 0, 0]
+		vect_pos = [0.1, 1.5, 1.8, -math.pi/2, 0, 0]
 		self.motion_lib.move_in_xyz_rpy(vect_pos)
 
 		while(pc1.header.stamp == self.last_Kinect_PC2.header.stamp):
@@ -115,7 +115,7 @@ class train_inspector():
 		pc1 = copy.deepcopy(self.last_Kinect_PC2)
 		pos1 = self.motion_lib.get_pos_xyz_rpy()
 
-		vect_pos = [0.00005, 1.5, 1.75, 0, 0, 0]
+		vect_pos = [0, 1.4, 1.75, 0, 0, 0]
 		self.motion_lib.move_in_xyz_rpy(vect_pos)
 
 		while(pc1.header.stamp == self.last_Kinect_PC2.header.stamp):
