@@ -137,10 +137,27 @@ float compute_average_distance(pcl::PointCloud<pcl::PointXYZ> pc1, pcl::PointClo
 pcl::PointCloud<pcl::PointXYZ> filter_cloud(pcl::PointCloud<pcl::PointXYZ> cloud_origin){
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
   *cloud = cloud_origin;
-  pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
-  voxel_grid.setInputCloud (cloud);
-  voxel_grid.setLeafSize (0.1, 0.1, 0.1);
-  voxel_grid.filter(*cloud);
+  
+  pcl::PassThrough<pcl::PointXYZ> pass;
+  pass.setInputCloud(cloud);
+  pass.setFilterFieldName("x");
+  pass.setFilterLimits(0.05, 4); //1.3 works well
+  pass.filter(*cloud);
+
+  pass.setInputCloud(cloud);
+  pass.setFilterFieldName("y");
+  pass.setFilterLimits(0.05, 4); //1.3 works well
+  pass.filter(*cloud);
+
+  pass.setInputCloud(cloud);
+  pass.setFilterFieldName("z");
+  pass.setFilterLimits(0.05, 4); //1.3 works well
+  pass.filter(*cloud);
+
+  pcl::VoxelGrid<pcl::PointXYZ> sor;
+  sor.setInputCloud (cloud);
+  sor.setLeafSize (0.1, 0.1, 0.1);
+  sor.filter (*cloud);
 
   return *cloud;
 }
