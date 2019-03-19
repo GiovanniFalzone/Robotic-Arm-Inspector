@@ -62,11 +62,11 @@
         </visual>
     </link>
     <link name="left_disk">
-        <pose>0.0 1.0 2.0 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <pose>0.0 0.5 2.0 0.0 1.5707963267948966 1.5707963267948966</pose>
         <collision name="collision">
             <geometry>
                 <cylinder>
-                    <radius>0.25</radius>
+                    <radius>0.5</radius>
                     <length>0.08</length>
                 </cylinder>
             </geometry>
@@ -74,7 +74,7 @@
         <visual name="visual">
             <geometry>
                 <cylinder>
-                    <radius>0.25</radius>
+                    <radius>0.5</radius>
                     <length>0.08</length>
                 </cylinder>
             </geometry>
@@ -85,7 +85,7 @@
         <collision name="collision">
             <geometry>
                 <cylinder>
-                    <radius>0.25</radius>
+                    <radius>0.5</radius>
                     <length>0.08</length>
                 </cylinder>
             </geometry>
@@ -93,21 +93,21 @@
         <visual name="visual">
             <geometry>
                 <cylinder>
-                    <radius>0.25</radius>
+                    <radius>0.5</radius>
                     <length>0.08</length>
                 </cylinder>
             </geometry>
         </visual>
     </link>
     <link name="left_pad">
-        <pose>0.0 1.04 2.0 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <pose>0.0 0.54 2.0 0.0 1.5707963267948966 1.5707963267948966</pose>
         <collision name="collision">
             <geometry>
                 <polyline>
-                    <point>0 -0.2</point>
-					<point>0.06 -0.19</point>
-                    <point>0.19 -0.06</point>
-					<point>0.2 0</point>
+                    <point>0 -0.3</point>
+					<point>0.1 -0.25</point>
+                    <point>0.25 -0.1</point>
+					<point>0.3 0</point>
 					<point>0 0</point>
                     <height>0.1</height>
                 </polyline>
@@ -116,10 +116,10 @@
         <visual name="visual">
             <geometry>
                 <polyline>
-                    <point>0 -0.2</point>
-					<point>0.06 -0.19</point>
-                    <point>0.19 -0.06</point>
-					<point>0.2 0</point>
+                    <point>0 -0.3</point>
+					<point>0.1 -0.25</point>
+                    <point>0.25 -0.1</point>
+					<point>0.3 0</point>
 					<point>0 0</point>
                     <height>0.1</height>
                 </polyline>
@@ -137,10 +137,10 @@
         <collision name="collision">
             <geometry>
                 <polyline>
-                    <point>0 -0.2</point>
-					<point>0.06 -0.19</point>
-                    <point>0.19 -0.06</point>
-					<point>0.2 0</point>
+                    <point>0 -0.3</point>
+					<point>0.1 -0.25</point>
+                    <point>0.25 -0.1</point>
+					<point>0.3 0</point>
 					<point>0 0</point>
                     <height>0.1</height>
                 </polyline>
@@ -149,10 +149,10 @@
         <visual name="visual">
             <geometry>
                 <polyline>
-                    <point>0 -0.2</point>
-					<point>0.06 -0.19</point>
-                    <point>0.19 -0.06</point>
-					<point>0.2 0</point>
+                    <point>0 -0.3</point>
+					<point>0.1 -0.25</point>
+                    <point>0.25 -0.1</point>
+					<point>0.3 0</point>
 					<point>0 0</point>
                     <height>0.1</height>
                 </polyline>

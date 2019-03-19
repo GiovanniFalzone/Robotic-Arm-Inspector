@@ -9,14 +9,13 @@
     axis_radius = 0.1
     axis_width = 3.0
     disk_width = wheel_width/5
-    disk_radius = wheel_radius/4
+    disk_radius = wheel_radius/2
 
     #default value for pads, will be changed to simulate "bad" or "good" pads
     pad_width = wheel_width/4
-    pad_radius = disk_radius
-    
-    bin_height = 1.0
+    pad_points = [[0, -0.3], [0.1, -0.25], [0.25, -0.1], [0.3, 0], [0, 0]]
 
+    bin_height = 1.0
     no_rotation = [0, 0, 0]
 
     # global variables for coordinates of the origin and for rotations
@@ -41,14 +40,14 @@
     axis_arr = [x0, ax_y0, z0, roll, pitch, yaw] 
 
     #disk variables
-    ld_y0 = axis_width/3
+    ld_y0 = axis_width/6
     left_disk_arr = [x0, ld_y0, z0, roll, pitch, yaw]
     
     rd_y0 = axis_width*2/3
     right_disk_arr = [x0, rd_y0, z0, roll, pitch, yaw]
 
     #pads variables
-    lp_y0 = axis_width/3 + disk_width/2
+    lp_y0 = axis_width/6 + disk_width/2
     left_pad_arr = [x0, lp_y0, z0, roll, pitch, yaw]
 
     rp_y0 = axis_width*2/3 - disk_width/2 - pad_width
@@ -163,11 +162,11 @@
         <collision name="collision">
             <geometry>
                 <polyline>
-                    <point>0 -0.2</point>
-					<point>0.06 -0.19</point>
-                    <point>0.19 -0.06</point>
-					<point>0.2 0</point>
-					<point>0 0</point>
+                    <point><%= pad_points[0].join(" ") %></point>
+					<point><%= pad_points[1].join(" ") %></point>
+                    <point><%= pad_points[2].join(" ") %></point>
+					<point><%= pad_points[3].join(" ") %></point>
+					<point><%= pad_points[4].join(" ") %></point>
                     <height><%= pad_width %></height>
                 </polyline>
             </geometry>
@@ -175,11 +174,11 @@
         <visual name="visual">
             <geometry>
                 <polyline>
-                    <point>0 -0.2</point>
-					<point>0.06 -0.19</point>
-                    <point>0.19 -0.06</point>
-					<point>0.2 0</point>
-					<point>0 0</point>
+                    <point><%= pad_points[0].join(" ") %></point>
+					<point><%= pad_points[1].join(" ") %></point>
+                    <point><%= pad_points[2].join(" ") %></point>
+					<point><%= pad_points[3].join(" ") %></point>
+					<point><%= pad_points[4].join(" ") %></point>
                     <height><%= pad_width %></height>
                 </polyline>
             </geometry>
@@ -196,11 +195,11 @@
         <collision name="collision">
             <geometry>
                 <polyline>
-                    <point>0 -0.2</point>
-					<point>0.06 -0.19</point>
-                    <point>0.19 -0.06</point>
-					<point>0.2 0</point>
-					<point>0 0</point>
+                    <point><%= pad_points[0].join(" ") %></point>
+					<point><%= pad_points[1].join(" ") %></point>
+                    <point><%= pad_points[2].join(" ") %></point>
+					<point><%= pad_points[3].join(" ") %></point>
+					<point><%= pad_points[4].join(" ") %></point>
                     <height><%= pad_width %></height>
                 </polyline>
             </geometry>
@@ -208,11 +207,11 @@
         <visual name="visual">
             <geometry>
                 <polyline>
-                    <point>0 -0.2</point>
-					<point>0.06 -0.19</point>
-                    <point>0.19 -0.06</point>
-					<point>0.2 0</point>
-					<point>0 0</point>
+                    <point><%= pad_points[0].join(" ") %></point>
+					<point><%= pad_points[1].join(" ") %></point>
+                    <point><%= pad_points[2].join(" ") %></point>
+					<point><%= pad_points[3].join(" ") %></point>
+					<point><%= pad_points[4].join(" ") %></point>
                     <height><%= pad_width %></height>
                 </polyline>
             </geometry>

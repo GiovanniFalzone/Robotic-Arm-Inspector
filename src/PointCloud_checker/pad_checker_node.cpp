@@ -46,7 +46,7 @@ plane_struct get_plane_struct(pcl::PointCloud<pcl::PointXYZ> cloud){
 	// Mandatory
 	seg.setModelType (pcl::SACMODEL_PLANE);
 	seg.setMethodType (pcl::SAC_RANSAC);
-	seg.setDistanceThreshold (0.1);
+	seg.setDistanceThreshold (0.01);
 
   publish_pc(cloud);
 	seg.setInputCloud (cloud.makeShared ());
@@ -141,23 +141,25 @@ pcl::PointCloud<pcl::PointXYZ> filter_cloud(pcl::PointCloud<pcl::PointXYZ> cloud
   pcl::PassThrough<pcl::PointXYZ> pass;
   pass.setInputCloud(cloud);
   pass.setFilterFieldName("x");
-  pass.setFilterLimits(0.05, 4); //1.3 works well
+  pass.setFilterLimits(-1, 1); //1.3 works well
   pass.filter(*cloud);
 
   pass.setInputCloud(cloud);
   pass.setFilterFieldName("y");
-  pass.setFilterLimits(0.05, 4); //1.3 works well
+  pass.setFilterLimits(-1, 1); //1.3 works well
   pass.filter(*cloud);
 
   pass.setInputCloud(cloud);
   pass.setFilterFieldName("z");
-  pass.setFilterLimits(0.05, 4); //1.3 works well
+  pass.setFilterLimits(-1, 1); //1.3 works well
   pass.filter(*cloud);
 
   pcl::VoxelGrid<pcl::PointXYZ> sor;
   sor.setInputCloud (cloud);
-  sor.setLeafSize (0.1, 0.1, 0.1);
+  sor.setLeafSize (0.01, 0.01, 0.1);
   sor.filter (*cloud);
+
+  // publish_pc(*cloud);
 
   return *cloud;
 }
