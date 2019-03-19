@@ -15,7 +15,8 @@
 
 #include <robotic_arm_inspector/planes_msg.h>
 #include <cmath>
-
+#include <pcl/filters/extract_indices.h>
+#include <pcl/filters/passthrough.h>
 
 ros::Publisher pub;
 
@@ -23,6 +24,17 @@ struct plane_struct{
 	pcl_msgs::ModelCoefficients coefficients;
 	pcl::PointIndices inliers;
 };
+
+void publish_pc(pcl::PointCloud<pcl::PointXYZ> cloud){
+  // convert to pointCloud2
+  pcl::PCLPointCloud2 point_cloud2;
+  pcl::toPCLPointCloud2(cloud, point_cloud2);
+  // Convert to ROS data type
+  sensor_msgs::PointCloud2 output;
+  pcl_conversions::moveFromPCL(point_cloud2, output);
+  // Publish the data
+  pub.publish (output);
+}
 
 plane_struct get_plane_struct(pcl::PointCloud<pcl::PointXYZ> cloud){
 	pcl::ModelCoefficients coefficients;
@@ -34,22 +46,40 @@ plane_struct get_plane_struct(pcl::PointCloud<pcl::PointXYZ> cloud){
 	// Mandatory
 	seg.setModelType (pcl::SACMODEL_PLANE);
 	seg.setMethodType (pcl::SAC_RANSAC);
-	seg.setDistanceThreshold (0.01);
+	seg.setDistanceThreshold (0.1);
 
+  publish_pc(cloud);
 	seg.setInputCloud (cloud.makeShared ());
 	seg.segment (inliers, coefficients); 
 
   plane_struct ret;
+  int i = 1;
   if (inliers.indices.size () == 0) {
     PCL_ERROR ("Could not estimate a planar model for the given dataset.");
     return ret;
   } else {
-    // Publish the model coefficients
-    pcl_msgs::ModelCoefficients ros_coefficients;
-    pcl_conversions::fromPCL(coefficients, ros_coefficients);
-    ROS_INFO("[%f,%f,%f,%f]", ros_coefficients.values[0],ros_coefficients.values[1],ros_coefficients.values[2],ros_coefficients.values[3]);
+    while (inliers.indices.size () > 0){
+      ros::Duration(1).sleep();
+      // Extract inliers
+      pcl::PointIndices::Ptr inliersptr (new pcl::PointIndices (inliers));
+      pcl::ExtractIndices<pcl::PointXYZ> extract;
+      extract.setInputCloud(cloud.makeShared());
+      extract.setIndices(inliersptr);
+      extract.setNegative(true);
+      pcl::PointCloud<pcl::PointXYZ> cloudF;
+      extract.filter(cloudF);
+      cloud.swap(cloudF);
+      publish_pc(cloud);
 
-    ret = {ros_coefficients, inliers};
+      // Publish the model coefficients
+      pcl_msgs::ModelCoefficients ros_coefficients;
+      pcl_conversions::fromPCL(coefficients, ros_coefficients);
+      ROS_INFO("%d: [%f,%f,%f,%f]", i++, ros_coefficients.values[0],ros_coefficients.values[1],ros_coefficients.values[2],ros_coefficients.values[3]);
+
+      ret = {ros_coefficients, inliers};
+      seg.setInputCloud (cloud.makeShared ());
+      seg.segment (inliers, coefficients);
+    }
   }
   return ret;
 }
@@ -96,7 +126,7 @@ float compute_average_distance(pcl::PointCloud<pcl::PointXYZ> pc1, pcl::PointClo
     // faccio la distanza punto piano tra un punto di un piano e l'altro piano
     float dist = compute_point_plane_distance(plane2.coefficients, point);
     // per fare le cose meno ignorri dovrei fare la distanza media tra i punti appartenenti al piano e l'altro piano
-    ROS_INFO("Point: [%f, %f, %f] Distance: %f", point[0], point[1], point[2], dist); 
+    // ROS_INFO("Point: [%f, %f, %f] Distance: %f", point[0], point[1], point[2], dist); 
     dist_sum += dist;
   }
   float avg_distance = dist_sum/plane1_size;
@@ -115,17 +145,6 @@ pcl::PointCloud<pcl::PointXYZ> filter_cloud(pcl::PointCloud<pcl::PointXYZ> cloud
   return *cloud;
 }
 
-void publish_pc(pcl::PointCloud<pcl::PointXYZ> cloud){
-  // convert to pointCloud2
-  pcl::PCLPointCloud2 point_cloud2;
-  pcl::toPCLPointCloud2(cloud, point_cloud2);
-  // Convert to ROS data type
-  sensor_msgs::PointCloud2 output;
-  pcl_conversions::moveFromPCL(point_cloud2, output);
-  // Publish the data
-  pub.publish (output);
-}
-
 // il tipo del messaggio dipende dal topic che è stato creato su quel tipo di mesaggio
 void cloud_analyzer (const robotic_arm_inspector::planes_msgConstPtr& input) {
 	// Convert the sensor_msgs/PointCloud2 data to pcl/PointCloud
@@ -136,7 +155,6 @@ void cloud_analyzer (const robotic_arm_inspector::planes_msgConstPtr& input) {
 
   // ROS_INFO("PC1 points: %lu", pc1.points.size());
   pc1 = filter_cloud(pc1);
-  publish_pc(pc1);
   // ROS_INFO("PC1 points: %lu", pc1.points.size());
 
   // ROS_INFO("PC2 points: %lu", pc2.points.size());
