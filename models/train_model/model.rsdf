@@ -40,14 +40,14 @@
     axis_arr = [x0, ax_y0, z0, roll, pitch, yaw] 
 
     #disk variables
-    ld_y0 = axis_width/6
+    ld_y0 = axis_width/3
     left_disk_arr = [x0, ld_y0, z0, roll, pitch, yaw]
     
     rd_y0 = axis_width*2/3
     right_disk_arr = [x0, rd_y0, z0, roll, pitch, yaw]
 
     #pads variables
-    lp_y0 = axis_width/6 + disk_width/2
+    lp_y0 = axis_width/3 + disk_width/2
     left_pad_arr = [x0, lp_y0, z0, roll, pitch, yaw]
 
     rp_y0 = axis_width*2/3 - disk_width/2 - pad_width

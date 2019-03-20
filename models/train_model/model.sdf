@@ -62,7 +62,7 @@
         </visual>
     </link>
     <link name="left_disk">
-        <pose>0.0 0.5 2.0 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <pose>0.0 1.0 2.0 0.0 1.5707963267948966 1.5707963267948966</pose>
         <collision name="collision">
             <geometry>
                 <cylinder>
@@ -100,7 +100,7 @@
         </visual>
     </link>
     <link name="left_pad">
-        <pose>0.0 0.54 2.0 0.0 1.5707963267948966 1.5707963267948966</pose>
+        <pose>0.0 1.04 2.0 0.0 1.5707963267948966 1.5707963267948966</pose>
         <collision name="collision">
             <geometry>
                 <polyline>

@@ -105,7 +105,6 @@ float compute_point_plane_distance(pcl_msgs::ModelCoefficients coefficients, flo
   // ROS_INFO("num: %f", num);
   // ROS_INFO("den: %f", den);
 
-  ROS_INFO("Distance: %f", dist);
   return dist;
 }
 
@@ -127,8 +126,6 @@ float compute_average_distance(pcl::PointCloud<pcl::PointXYZ> pc){
     // ROS_INFO("point [%f,%f,%f]", point[0], point[1], point[2]);
     // faccio la distanza punto piano tra un punto di un piano e l'altro piano
     float dist = compute_point_plane_distance(planes[1].coefficients, point);
-    float dist_plane_1 = compute_point_plane_distance(planes[0].coefficients, point);
-    ROS_INFO("QUESTO DEVE ESSERE CIRCA ZERO: %f", dist_plane_1);
     // per fare le cose meno ignorri dovrei fare la distanza media tra i punti appartenenti al piano e l'altro piano
     // ROS_INFO("Point: [%f, %f, %f] Distance: %f", point[0], point[1], point[2], dist); 
     dist_sum += dist;
@@ -173,7 +170,7 @@ void cloud_analyzer (const robotic_arm_inspector::planes_msgConstPtr& input) {
 	// Convert the sensor_msgs/PointCloud2 data to pcl/PointCloud
 	pcl::PointCloud<pcl::PointXYZ> pc;
 	// pcl::PointCloud<pcl::PointXYZ> pc2;
-	pcl::fromROSMsg (input->pc1, pc);
+	pcl::fromROSMsg (input->pc, pc);
 	// pcl::fromROSMsg (input->pc2, pc2);  
 
   // ROS_INFO("PC1 points: %lu", pc1.points.size());
