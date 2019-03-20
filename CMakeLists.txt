@@ -149,15 +149,6 @@ add_definitions(${PCL_DEFINITIONS})
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/robotic_arm_inspector_node.cpp)
 
-add_executable(example src/PointCloud_checker/example.cpp)
-target_link_libraries(example ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-
-add_executable(example_2 src/PointCloud_checker/example_2.cpp)
-target_link_libraries(example_2 ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-
-add_executable(example_3 src/PointCloud_checker/example_3.cpp)
-target_link_libraries(example_3 ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-
 add_executable(pad_checker_node src/PointCloud_checker/pad_checker_node.cpp)
 target_link_libraries(pad_checker_node ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
