@@ -36,7 +36,7 @@ void publish_pc(pcl::PointCloud<pcl::PointXYZ> cloud){
   pub.publish (output);
 }
 
-plane_struct get_plane_struct(pcl::PointCloud<pcl::PointXYZ> cloud){
+void get_plane_struct(pcl::PointCloud<pcl::PointXYZ> cloud, plane_struct* ret){
 	pcl::ModelCoefficients coefficients;
 	pcl::PointIndices inliers;
 	// Create the segmentation object
@@ -46,19 +46,18 @@ plane_struct get_plane_struct(pcl::PointCloud<pcl::PointXYZ> cloud){
 	// Mandatory
 	seg.setModelType (pcl::SACMODEL_PLANE);
 	seg.setMethodType (pcl::SAC_RANSAC);
-	seg.setDistanceThreshold (0.01);
+	seg.setDistanceThreshold (0.005);
 
   publish_pc(cloud);
 	seg.setInputCloud (cloud.makeShared ());
 	seg.segment (inliers, coefficients); 
 
-  plane_struct ret;
-  int i = 1;
+  int i = 0;
   if (inliers.indices.size () == 0) {
     PCL_ERROR ("Could not estimate a planar model for the given dataset.");
-    return ret;
+    return;
   } else {
-    while (inliers.indices.size () > 0){
+    while (inliers.indices.size () > 0 && i < 2){
       ros::Duration(1).sleep();
       // Extract inliers
       pcl::PointIndices::Ptr inliersptr (new pcl::PointIndices (inliers));
@@ -74,14 +73,16 @@ plane_struct get_plane_struct(pcl::PointCloud<pcl::PointXYZ> cloud){
       // Publish the model coefficients
       pcl_msgs::ModelCoefficients ros_coefficients;
       pcl_conversions::fromPCL(coefficients, ros_coefficients);
-      ROS_INFO("%d: [%f,%f,%f,%f]", i++, ros_coefficients.values[0],ros_coefficients.values[1],ros_coefficients.values[2],ros_coefficients.values[3]);
-
-      ret = {ros_coefficients, inliers};
+      ret[i] = {ros_coefficients, inliers};
+      
+      ROS_INFO("plane %d: [%f,%f,%f,%f]", i, ros_coefficients.values[0],ros_coefficients.values[1],ros_coefficients.values[2],ros_coefficients.values[3]);
+      
       seg.setInputCloud (cloud.makeShared ());
       seg.segment (inliers, coefficients);
+      i++;
     }
   }
-  return ret;
+  return;
 }
 
 float compute_point_plane_distance(pcl_msgs::ModelCoefficients coefficients, float point[3]){
@@ -96,7 +97,7 @@ float compute_point_plane_distance(pcl_msgs::ModelCoefficients coefficients, flo
   // ROS_INFO("plane [%f,%f,%f,%f]", A, B, C, D);
   // ROS_INFO("point [%f,%f,%f]", x, y, z);
 
-  float num = fabs(A*x + B*y + C*z - D);
+  float num = fabs(A*x + B*y + C*z + D);
   float den = sqrt(pow(A,2) + pow(B,2) + pow(C,2));
   float dist = num/den;
 
@@ -104,27 +105,30 @@ float compute_point_plane_distance(pcl_msgs::ModelCoefficients coefficients, flo
   // ROS_INFO("num: %f", num);
   // ROS_INFO("den: %f", den);
 
-  // ROS_INFO("Distance: %f", dist);
+  ROS_INFO("Distance: %f", dist);
   return dist;
 }
 
-float compute_average_distance(pcl::PointCloud<pcl::PointXYZ> pc1, pcl::PointCloud<pcl::PointXYZ> pc2){
-	plane_struct plane1 = get_plane_struct(pc1);
-	plane_struct plane2 = get_plane_struct(pc2);
-  // ROS_INFO_STREAM("plane1: " << plane1.inliers);
+float compute_average_distance(pcl::PointCloud<pcl::PointXYZ> pc){
+	plane_struct planes[2];
+  get_plane_struct(pc, planes);
+	// plane_struct plane2 = get_plane_struct(pc2);
+  // ROS_INFO_STREAM("plane1: " << planes[0].inliers.indices.size());
   // ROS_INFO_STREAM("plane2: " << plane2.inliers);
   // adesso ho gli indici dei punti appartenenti al piano
   // devo spostare sia il punto che il piano in base alla posizione del kinect
   float point[3] = {1.0, 1.0, 1.0};
   float dist_sum = 0.0;
-  size_t plane1_size = plane1.inliers.indices.size();
+  size_t plane1_size = planes[0].inliers.indices.size();
   for (size_t i = 0; i < plane1_size; ++i){
-    point[0] = pc1.points[plane1.inliers.indices[i]].x;
-    point[1] = pc1.points[plane1.inliers.indices[i]].y;
-    point[2] = pc1.points[plane1.inliers.indices[i]].z;
+    point[0] = pc.points[planes[0].inliers.indices[i]].x;
+    point[1] = pc.points[planes[0].inliers.indices[i]].y;
+    point[2] = pc.points[planes[0].inliers.indices[i]].z;
     // ROS_INFO("point [%f,%f,%f]", point[0], point[1], point[2]);
     // faccio la distanza punto piano tra un punto di un piano e l'altro piano
-    float dist = compute_point_plane_distance(plane2.coefficients, point);
+    float dist = compute_point_plane_distance(planes[1].coefficients, point);
+    float dist_plane_1 = compute_point_plane_distance(planes[0].coefficients, point);
+    ROS_INFO("QUESTO DEVE ESSERE CIRCA ZERO: %f", dist_plane_1);
     // per fare le cose meno ignorri dovrei fare la distanza media tra i punti appartenenti al piano e l'altro piano
     // ROS_INFO("Point: [%f, %f, %f] Distance: %f", point[0], point[1], point[2], dist); 
     dist_sum += dist;
@@ -156,7 +160,7 @@ pcl::PointCloud<pcl::PointXYZ> filter_cloud(pcl::PointCloud<pcl::PointXYZ> cloud
 
   pcl::VoxelGrid<pcl::PointXYZ> sor;
   sor.setInputCloud (cloud);
-  sor.setLeafSize (0.01, 0.01, 0.1);
+  sor.setLeafSize (0.05, 0.05, 0.1);
   sor.filter (*cloud);
 
   // publish_pc(*cloud);
@@ -167,20 +171,20 @@ pcl::PointCloud<pcl::PointXYZ> filter_cloud(pcl::PointCloud<pcl::PointXYZ> cloud
 // il tipo del messaggio dipende dal topic che è stato creato su quel tipo di mesaggio
 void cloud_analyzer (const robotic_arm_inspector::planes_msgConstPtr& input) {
 	// Convert the sensor_msgs/PointCloud2 data to pcl/PointCloud
-	pcl::PointCloud<pcl::PointXYZ> pc1;
-	pcl::PointCloud<pcl::PointXYZ> pc2;
-	pcl::fromROSMsg (input->pc1, pc1);
-	pcl::fromROSMsg (input->pc2, pc2);  
+	pcl::PointCloud<pcl::PointXYZ> pc;
+	// pcl::PointCloud<pcl::PointXYZ> pc2;
+	pcl::fromROSMsg (input->pc1, pc);
+	// pcl::fromROSMsg (input->pc2, pc2);  
 
   // ROS_INFO("PC1 points: %lu", pc1.points.size());
-  pc1 = filter_cloud(pc1);
+  pc = filter_cloud(pc);
   // ROS_INFO("PC1 points: %lu", pc1.points.size());
 
   // ROS_INFO("PC2 points: %lu", pc2.points.size());
-  pc2 = filter_cloud(pc2);
+  // pc2 = filter_cloud(pc2);
   // ROS_INFO("PC2 points: %lu", pc2.points.size());
 
-  float dist = compute_average_distance(pc1,pc2);
+  float dist = compute_average_distance(pc);
 
 }
 

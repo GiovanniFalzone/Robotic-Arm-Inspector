@@ -229,7 +229,8 @@ def inspect_train():
 \t-> cone to move in checking position \n\
 \t-> axis to check axis\n\
 \t-> pad to check pads\n\
-\t-> check to check the train\n'
+\t-> check to check the train\n\
+\t-> p to print train specs\n'
 	cmd = raw_input(msg)
 	if('1' in cmd):
 		inspector.move_in_sleep_position()
@@ -286,6 +287,9 @@ def inspect_train():
 
 	elif('check' in cmd):
 		inspector.check_train(train_model.train_structure)
+	
+	elif 'p' in cmd:
+		train_model.train_struct_print()
 
 	else:
 		print('Wrong input \n')
