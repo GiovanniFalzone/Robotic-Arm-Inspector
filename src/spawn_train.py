@@ -181,7 +181,7 @@ def spawn_train(spawn_srv, delete_srv):
 		print train_model.train_structure
 		return 1
 	else:
-		print 'Command not valid\n'
+		print 'Command not valid'
 		return 0
 
 	while True:
@@ -200,7 +200,7 @@ def spawn_train(spawn_srv, delete_srv):
 		else:
 			inspector.set_train_description(train_model.train_structure)
 			rospy.loginfo("Inspecting the environment")
-			if !inspection:
+			if not inspection:
 				inspector.check_train()
 				inspection = True
 			rospy.loginfo("Success")
@@ -271,7 +271,7 @@ def inspect_train(delete_srv):
 		print model_id
 		return -1
 	else:
-		print('Command not valid \n')
+		print('Command not valid')
 	return 0
 
 if __name__ == '__main__':
