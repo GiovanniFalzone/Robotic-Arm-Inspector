@@ -93,7 +93,8 @@ class train_inspector():
 		vect_pos = [right_pad[0], right_pad[1]-0.4, right_pad[2]-0.25, 0, 0, 0]
 		self.motion_lib.move_in_xyz_rpy(vect_pos)
 		now = rospy.get_rostime()
-		while(self.last_Kinect_PC2.header.stamp <= now):
+		now.secs +=1
+		while(self.last_Kinect_PC2.header.stamp.secs <= now.secs):
 			pass
 		pc = copy.deepcopy(self.last_Kinect_PC2)
 		self.send_to_PC_checker(pc)
