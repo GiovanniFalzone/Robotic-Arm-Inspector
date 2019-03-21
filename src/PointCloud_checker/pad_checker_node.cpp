@@ -75,7 +75,7 @@ void get_plane_struct(pcl::PointCloud<pcl::PointXYZ> cloud, plane_struct* ret){
       pcl_conversions::fromPCL(coefficients, ros_coefficients);
       ret[i] = {ros_coefficients, inliers};
       
-      ROS_INFO("plane %d: [%f,%f,%f,%f]", i, ros_coefficients.values[0],ros_coefficients.values[1],ros_coefficients.values[2],ros_coefficients.values[3]);
+      // ROS_INFO("plane %d: [%f,%f,%f,%f]", i, ros_coefficients.values[0],ros_coefficients.values[1],ros_coefficients.values[2],ros_coefficients.values[3]);
       
       seg.setInputCloud (cloud.makeShared ());
       seg.segment (inliers, coefficients);
@@ -131,7 +131,9 @@ float compute_average_distance(pcl::PointCloud<pcl::PointXYZ> pc){
     dist_sum += dist;
   }
   float avg_distance = dist_sum/plane1_size;
-  ROS_INFO("Average Distance: %f", avg_distance); 
+  ROS_INFO("Pad width: %f", avg_distance);
+  if(avg_distance < 0.05)
+    ROS_INFO("WARNING: pad should be replaced"); 
   return avg_distance;
 }
 
