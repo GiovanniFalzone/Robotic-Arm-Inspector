@@ -22,6 +22,7 @@ x0 = 0.0
 y0 = 0.0
 z0 = 2.0
 model_id = 0
+inspection = False
 
 # a pad is considered "good" or "bad" w.r.t. its width
 good_pad_width = 0.1		
@@ -129,31 +130,32 @@ def spawn_train(spawn_srv, delete_srv):
 	spawn_srv: the ros proxy to spawn model on gazebo
 	delete_srv: the ros proxy to delete model from gazebo"""
 	
-	out_msg = 'Press \n\
-\t-> 1 to spawn a train with "good" pads \n\
-\t-> 2 to spawn a train with "bad" pads \n\
-\t-> 3 to spawn a train with random pads \n\
-\t-> 4 to spawn a train with chosen pads width \n\
-\t-> c to continue (train already spawned)\n'
+	out_msg = 'Insert a command: \n\
+\t-> "good" to spawn a train with "good" pads \n\
+\t-> "bad" to spawn a train with "bad" pads \n\
+\t-> "rand" to spawn a train with random pads \n\
+\t-> "custom" to spawn a train with chosen pads width \n\
+\t-> "continue" to continue (train already spawned)\n'
 
 	global model_id
+	global inspection
 
 	in_cmd = raw_input(out_msg)
 	model_id +=1
-	if '1' in in_cmd:
+	if 'good' in in_cmd:
 		# Spawn train with good pads
 		print "Spawning train with good pads"
 		req = create_train_request("train_model_"+str(model_id), 		# model name
 									0.0, 0.0, 0.0,		# train initial position
 									good_pad_width, good_pad_width)  		# pads length (status)
 		spawn_srv.call(req)
-	elif '2' in in_cmd:
+	elif 'bad' in in_cmd:
 		print "Spawning train with bad pads"
 		req = create_train_request("train_model_"+str(model_id), 
 									0.0, 0.0, 0.0,
 									bad_pad_width, bad_pad_width) 
 		spawn_srv.call(req)
-	elif '3' in in_cmd:
+	elif 'rand' in in_cmd:
 		print "Spawning train with random pads width"
 		lpw = random.uniform(bad_pad_width, good_pad_width)
 		print "-left pad width "+str(lpw)
@@ -163,7 +165,7 @@ def spawn_train(spawn_srv, delete_srv):
 									0.0, 0.0, 0.0,
 									lpw, rpw) 
 		spawn_srv.call(req)
-	elif '4' in in_cmd:
+	elif 'custom' in in_cmd:
 		out_msg = 'Choose pads width for left pad\n'
 		lpw = float(raw_input(out_msg))
 		out_msg = 'Choose pads width for right pad\n'
@@ -175,27 +177,32 @@ def spawn_train(spawn_srv, delete_srv):
 									0.0, 0.0, 0.0,
 									lpw, rpw)
 		spawn_srv.call(req)	
-	elif 'c' in in_cmd:
+	elif 'continue' in in_cmd:
 		print train_model.train_structure
-		return 1	
+		return 1
+	else:
+		print 'Command not valid\n'
+		return 0
 
 	while True:
-		conf_msg = 'Press \n\
-	\t-> 0 to delete the spawned train \n\
-	\t-> p to print train specs \n\
-	\t-> c to confirm and continue \n'
+		conf_msg = 'Insert a command \n\
+\t-> "del" to delete the spawned train\n\
+\t-> "print" to print train specs \n\
+\t-> "confirm" to confirm and continue \n'
 		in_cmd = raw_input(conf_msg)
 
-		if '0' in in_cmd:
+		if 'del' in in_cmd:
 			print "Deleting train model"
 			delete_srv("train_model_"+str(model_id))
 			return 0
-		elif 'p' in in_cmd:
+		elif 'print' in in_cmd:
 			train_model.train_struct_print()
 		else:
 			inspector.set_train_description(train_model.train_structure)
 			rospy.loginfo("Inspecting the environment")
-			inspector.check_train()
+			if !inspection:
+				inspector.check_train()
+				inspection = True
 			rospy.loginfo("Success")
 			return 1
 
@@ -214,61 +221,58 @@ def get_vector(msg):
 def get_position():
 	return get_vector('Insert coordinates')
 
-def inspect_train():
+def inspect_train(delete_srv):
 	
-	msg = 'Press \n\
-\t-> 1 to move in initial position \n\
-\t-> 2 to move in max estension position \n\
-\t-> line to move following a cone base \n\
-\t-> circle to move following a circle \n\
-\t-> cone to move in checking position \n\
-\t-> pad to check pads\n\
-\t-> check to check the environment\n\
-\t-> pos to move the arm in a specific position\n\
-\t-> rotate to rotate the end effector\n\
-\t-> p to print train specs\n'
+	msg = 'Insert a command: \n\
+\t-> "init" to move to initial position \n\
+\t-> "max" to move to max estension position \n\
+\t-> "line" to move following a cone base \n\
+\t-> "circle" to move following a circle \n\
+\t-> "cone" to move in checking position \n\
+\t-> "pad" to check pads\n\
+\t-> "check" to check the environment\n\
+\t-> "pos" to move the arm in a specific position\n\
+\t-> "rotate" to rotate the end effector\n\
+\t-> "print" to print train specs\n\
+\t-> "restart" to delete the train and spawn a new train\n'
 	cmd = raw_input(msg)
-	if('1' in cmd):
+	if('init' in cmd):
 		inspector.move_in_sleep_position()
-	elif('2' in cmd):
+	elif('max' in cmd):
 		inspector.move_in_waiting_position()
 	elif('circle' in cmd):
 		vect_pos = get_position()
 		print('Circle center: ' + str(vect_pos))
 		motion_lib.follow_circle_z(vect_pos)
-
 	elif('cone' in cmd):
 		vect_pos = get_position()
 		motion_lib.follow_cone_base_z(vect_pos)
-
 	elif('line' in cmd):
 		vect_pos = get_position()
 		steps = get_number('Insert How many step:')
 		direction = get_vector('Insert Direction (Delta for each axis)')
 		motion_lib.follow_line(vect_pos, direction, steps)
-	elif('train_pads' in cmd):
-		inspector.inspect_pads()
 	elif('pos' in cmd):
 		vect_pos = get_position()
 		vect_pos.extend([0,0,0]),
 		print('moving to: ' + str(vect_pos))
 		motion_lib.move_in_xyz_rpy(vect_pos)
-
 	elif('rotate' in cmd):
 		vect = get_vector('Insert rpy as: ')
 		motion_lib.rotate(vect)
-
 	elif('pad' in cmd):
 		inspector.inspect_pads()
-
 	elif('check' in cmd):
 		inspector.check_train()
-	
-	elif 'p' in cmd:
+	elif 'print' in cmd:
 		train_model.train_struct_print()
-
+	elif 'restart' in cmd:
+		delete_srv("train_model_"+str(model_id))
+		print model_id
+		return -1
 	else:
-		print('Wrong input \n')
+		print('Command not valid \n')
+	return 0
 
 if __name__ == '__main__':
 
@@ -285,22 +289,24 @@ if __name__ == '__main__':
 	rospy.loginfo("Connected to spawn service!")
 
 	cont = 0
-	while cont == 0:
-		try:
-			cont = spawn_train(spawn_srv, delete_srv)
-		except rospy.ROSInterruptException:
-			print('rospy exception')
-			break
-		except KeyboardInterrupt:
-			print('keyboard interrupt')
-			break
-		
-	while True:
-		try:
-			inspect_train()
-		except rospy.ROSInterruptException:
-			print('rospy exception')
-			break
-		except KeyboardInterrupt:
-			print('keyboard interrupt')
-			break
+	while cont <= 0:
+		while cont <= 0:
+			try:
+				cont = spawn_train(spawn_srv, delete_srv)
+			except rospy.ROSInterruptException:
+				print('rospy exception')
+				break
+			except KeyboardInterrupt:
+				print('keyboard interrupt')
+				break
+		cmd = 0
+		while cmd == 0:
+			try:
+				cmd = inspect_train(delete_srv)
+			except rospy.ROSInterruptException:
+				print('rospy exception')
+				break
+			except KeyboardInterrupt:
+				print('keyboard interrupt')
+				break
+		cont = cmd
