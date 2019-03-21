@@ -89,13 +89,11 @@ class train_inspector():
 		self.motion_lib.follow_cone_base_z(right_pad, 0.1, dist, 2*math.pi, 1, 5)
 		
 	def inspect_pads(self):
-		pc = copy.deepcopy(self.last_Kinect_PC2)
 		right_pad = self.train_description.get('pads').get('coordinates').get('right')
-
 		vect_pos = [right_pad[0], right_pad[1]-0.4, right_pad[2]-0.25, 0, 0, 0]
 		self.motion_lib.move_in_xyz_rpy(vect_pos)
-
-		while(pc.header.stamp == self.last_Kinect_PC2.header.stamp):
+		now = rospy.get_rostime()
+		while(self.last_Kinect_PC2.header.stamp <= now):
 			pass
 		pc = copy.deepcopy(self.last_Kinect_PC2)
 		self.send_to_PC_checker(pc)
