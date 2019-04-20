@@ -1,4 +1,4 @@
-# Robotic-Arm-Inspector
+# RAVI, Robotic Arm for Vehicle Inspection
 ## Description
 ROS robotic arm to inspect vehicles mechanical components.
 Using the kinect mounted on the end effector of a UR5 robotic arm
