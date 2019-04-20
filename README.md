@@ -1,7 +1,8 @@
 # RAVI, Robotic Arm for Vehicle Inspection
 ## Description
-ROS robotic arm to inspect vehicles mechanical components.
-Using the kinect mounted on the end effector of a UR5 robotic arm
+The project represents a ROS prototype for a robotic arm, useful for works of
+inspection of mechanical components in vehicle environments, in this case with particular attention to
+train inspection.
 
 ## Authors
 Giovanni Falzone - www.github.com/GiovanniFalzone - giovannifalzone.github.io \
